@@ -47,6 +47,8 @@ setopt prompt_subst
 alias vim=nvim
 alias dotfiles='git --git-dir=$HOME/.config/dotfiles --work-tree=$HOME'
 alias tree='tree -L 2'
+alias py='python3'
+alias cours='cd ~/Documents/Bac2Math/cours'
 # Prompt (on left side) similar to default bash prompt, or redhat zsh prompt with colors
  #PROMPT="%(!.%{$fg[red]%}[%n@%m %1~]%{$reset_color%}# .%{$fg[green]%}[%n@%m %1~]%{$reset_color%}$ "
 # Maia prompt
