@@ -8,6 +8,8 @@ fi
 # Charger Powerlevel10k sans utiliser ZSH_THEME
 source ~/dotfiles/zsh/themes/powerlevel10k/powerlevel10k.zsh-theme
 
+# Supprimer l'avertissement de Powerlevel10k
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 ## Options section
 setopt CORRECT                                                  # Auto correct mistakes
@@ -49,12 +51,10 @@ alias dotfiles='git --git-dir=$HOME/.config/dotfiles --work-tree=$HOME'
 alias tree='tree -L 2'
 alias py='python3'
 alias cours='cd ~/Documents/Bac2Math/cours'
-# Prompt (on left side) similar to default bash prompt, or redhat zsh prompt with colors
- #PROMPT="%(!.%{$fg[red]%}[%n@%m %1~]%{$reset_color%}# .%{$fg[green]%}[%n@%m %1~]%{$reset_color%}$ "
+
 # Maia prompt
-PROMPT="%B%{$fg[cyan]%}%(4~|%-1~/.../%2~|%~)%u%b >%{$fg[cyan]%}>%B%(?.%{$fg[cyan]%}.%{$fg[red]%})>%{$reset_color%}%b " # Print some system information when the shell is first started
-# Print a greeting message when shell is started
-echo $USER@$HOST  $(uname -srm) $(source /etc/os-release && echo "$BUILD_ID")
+PROMPT="%B%{$fg[cyan]%}%(4~|%-1~/.../%2~|%~)%u%b >%{$fg[cyan]%}>%B%(?.%{$fg[cyan]%}.%{$fg[red]%})>%{$reset_color%}%b " 
+
 ## Prompt on right side:
 #  - shows status of git when in git repository (code adapted from https://techanic.net/2012/12/30/my_git_prompt_for_zsh.html)
 #  - shows exit status of previous command (if previous command finished with an error)
@@ -76,30 +76,33 @@ toggle_blur() {
     # Vérifier si le terminal parent est GNOME Terminal
     local parent_terminal=$(ps --no-header -p $PPID -o comm)
 
-    if [[ $parent_terminal == "gnome-terminal-server"|| $parent_terminal=="zsh" ]]; then
+    if [[ $parent_terminal == "gnome-terminal-server" || $parent_terminal == "gnome-terminal-" ]]; then
         echo "Terminal parent détecté : $parent_terminal"
 
-        # On suppose ici que le flou peut être activé ou désactivé via un outil comme gsettings
-        # Vérifier l'état actuel du flou
-        current_blur=$(gsettings get org.gnome.desktop.background blur-enabled)
+        # Vérifier l'état actuel du flou (utiliser une clé valide)
+        current_blur=$(gsettings get org.gnome.desktop.interface enable-animations)
 
         if [[ "$current_blur" == "true" ]]; then
             # Si le flou est déjà activé, le désactiver
             echo "Désactivation du flou"
-            gsettings set org.gnome.desktop.background blur-enabled false
+            gsettings set org.gnome.desktop.interface enable-animations false
         else
             # Si le flou est désactivé, l'activer
             echo "Activation du flou"
-            gsettings set org.gnome.desktop.background blur-enabled true
+            gsettings set org.gnome.desktop.interface enable-animations true
         fi
     else
         echo "Le terminal parent n'est pas GNOME Terminal, terminal détecté : $parent_terminal"
     fi
 }
 
-
 # Alias pour une commande qui active/désactive le flou
 alias blur="toggle_blur"
 
+# Print a greeting message when shell is started
+echo $USER@$HOST  $(uname -srm) $(source /etc/os-release && echo "$BUILD_ID")
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+. "$HOME/.local/bin/env"
