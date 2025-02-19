@@ -82,7 +82,7 @@ toggle_blur() {
     # Check if the parent terminal is GNOME Terminal
     local parent_terminal=$(ps --no-header -p $PPID -o comm)
 
-    if [[ $parent_terminal == "gnome-terminal-server" || $parent_terminal == "gnome-terminal-" ]]; then
+    if [[ $parent_terminal == "kconsole" || $parent_terminal == "gnome-terminal-" ]]; then
         echo "Terminal parent detected: $parent_terminal"
 
         # Check the current blur state (using a valid key)
