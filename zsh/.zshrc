@@ -40,7 +40,7 @@ zstyle ':completion:*' cache-path ~/.zsh/cache
 HISTFILE=~/.zhistory
 HISTSIZE=1000
 SAVEHIST=500
-export EDITOR=/usr/bin/emacs   # Default text editor (Vim)
+export EDITOR=emacs   # Default text editor (emacs)
 #export VISUAL=/usr/bin/gvim
 
 # Word characters: Do not consider certain characters as part of the word
