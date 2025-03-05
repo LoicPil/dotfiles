@@ -40,8 +40,7 @@ zstyle ':completion:*' cache-path ~/.zsh/cache
 HISTFILE=~/.zhistory
 HISTSIZE=1000
 SAVEHIST=500
-export EDITOR="emacs -nw"   # Default text editor (emacs)
-
+export EDITOR="emacs -nw"  # Default text editor (Vim)
 #export VISUAL=/usr/bin/gvim
 
 # Word characters: Do not consider certain characters as part of the word
@@ -80,25 +79,28 @@ GIT_PROMPT_STAGED="%{$fg_bold[green]%}●%{$reset_color%}"        # green circle
 
 # Function to toggle blur effect on GNOME Terminal
 toggle_blur() {
-    # Récupérer la valeur actuelle des pipelines
-    current_pipelines=$(gsettings get org.gnome.shell.extensions.blur-my-shell pipelines)
+    # Check if the parent terminal is GNOME Terminal
+    local parent_terminal=$(ps --no-header -p $PPID -o comm)
 
-    # Désactivation du flou
-    if [[ "$current_pipelines" == *"radius"* && "$current_pipelines" == *"30"* ]]; then
-        echo "Désactivation du flou"
-        # Formatage correct pour désactiver le flou
-        gsettings set org.gnome.shell.extensions.blur-my-shell pipelines "[{'name': 'Default', 'effects': [{'type': 'native_static_gaussian_blur', 'id': 'effect_000000000000', 'params': {'radius': 0, 'brightness': 0.6}}]}]"
+    if [[ $parent_terminal == "kconsole" || $parent_terminal == "gnome-terminal-" ]]; then
+        echo "Terminal parent detected: $parent_terminal"
+
+        # Check the current blur state (using a valid key)
+        current_blur=$(gsettings get org.gnome.desktop.interface enable-animations)
+
+        if [[ "$current_blur" == "true" ]]; then
+            # If blur is enabled, disable it
+            echo "Disabling blur"
+            gsettings set org.gnome.desktop.interface enable-animations false
+        else
+            # If blur is disabled, enable it
+            echo "Enabling blur"
+            gsettings set org.gnome.desktop.interface enable-animations true
+        fi
     else
-        echo "Activation du flou"
-        # Formatage correct pour activer le flou avec rayon 30
-        gsettings set org.gnome.shell.extensions.blur-my-shell pipelines "[{'name': 'Default', 'effects': [{'type': 'native_static_gaussian_blur', 'id': 'effect_000000000000', 'params': {'radius': 30, 'brightness': 0.6}}]}]"
+        echo "The parent terminal is not GNOME Terminal, detected terminal: $parent_terminal"
     fi
 }
-
-
-
-
-
 
 # Alias to toggle blur
 alias blur="toggle_blur"
