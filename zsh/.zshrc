@@ -79,28 +79,41 @@ GIT_PROMPT_STAGED="%{$fg_bold[green]%}●%{$reset_color%}"        # green circle
 
 # Function to toggle blur effect on GNOME Terminal
 toggle_blur() {
-    # Check if the parent terminal is GNOME Terminal
-    local parent_terminal=$(ps --no-header -p $PPID -o comm)
+    # Trouver le terminal parent réel
+    local parent_terminal=$(ps -o comm= -p $(ps -o ppid= -p $$))
 
-    if [[ $parent_terminal == "kconsole" || $parent_terminal == "gnome-terminal-" ]]; then
-        echo "Terminal parent detected: $parent_terminal"
+    if [[ "$parent_terminal" == "gnome-terminal" || "$parent_terminal" == "gnome-terminal-server" ]]; then
+        echo "Détection de GNOME Terminal..."
+        current_blur=$(gsettings get org.gnome.shell.extensions.blur-my-shell pipelines)
 
-        # Check the current blur state (using a valid key)
-        current_blur=$(gsettings get org.gnome.desktop.interface enable-animations)
-
-        if [[ "$current_blur" == "true" ]]; then
-            # If blur is enabled, disable it
-            echo "Disabling blur"
-            gsettings set org.gnome.desktop.interface enable-animations false
+        if [[ "$current_blur" == *"radius"* && "$current_blur" == *"30"* ]]; then
+            echo "Désactivation du flou dans GNOME"
+            gsettings set org.gnome.shell.extensions.blur-my-shell pipelines "[{'name': 'Default', 'effects': [{'type': 'native_static_gaussian_blur', 'id': 'effect_000000000000', 'params': {'radius': 0, 'brightness': 0.6}}]}]"
         else
-            # If blur is disabled, enable it
-            echo "Enabling blur"
-            gsettings set org.gnome.desktop.interface enable-animations true
+            echo "Activation du flou dans GNOME"
+            gsettings set org.gnome.shell.extensions.blur-my-shell pipelines "[{'name': 'Default', 'effects': [{'type': 'native_static_gaussian_blur', 'id': 'effect_000000000000', 'params': {'radius': 30, 'brightness': 0.6}}]}]"
         fi
+
+    elif [[ "$parent_terminal" == "konsole" ]]; then
+        echo "Détection de Konsole (KDE)..."
+        profile=$(konsole --list-profiles | head -n 1)
+        config_file="$HOME/.local/share/konsole/${profile}.profile"
+
+        if grep -q "Blur=true" "$config_file"; then
+            echo "Désactivation du flou dans Konsole"
+            kwriteconfig5 --file "$config_file" --group "Appearance" --key "Blur" "false"
+        else
+            echo "Activation du flou dans Konsole"
+            kwriteconfig5 --file "$config_file" --group "Appearance" --key "Blur" "true"
+        fi
+
+        echo "Relance manuelle requise : ferme et rouvre Konsole ou utilise : konsole --profile \"$profile\""
+
     else
-        echo "The parent terminal is not GNOME Terminal, detected terminal: $parent_terminal"
+        echo "Terminal non supporté pour le flou : $parent_terminal"
     fi
 }
+
 
 # Alias to toggle blur
 alias blur="toggle_blur"
