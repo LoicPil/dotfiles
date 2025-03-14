@@ -1,0 +1,12 @@
+[user]
+	email = piletteloic@gmail.com
+	name = Pilette Loïc
+[core]
+	editor = emacs -nw
+[init]
+	defaultBranch = main
+[color]
+	status = auto
+	branch = auto
+	interactive = auto
+	diff = auto
