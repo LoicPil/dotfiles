@@ -62,7 +62,7 @@ alias dotfiles='git --git-dir=$HOME/.config/dotfiles --work-tree=$HOME'
 alias tree='tree -L 2'
 alias py='python3'
 alias cours='cd ~/Documents/Bac2Math/cours'
-
+alias gits='git status -s'
 # Maia prompt
 PROMPT="%B%{$fg[cyan]%}%(4~|%-1~/.../%2~|%~)%u%b >%{$fg[cyan]%}>%B%(?.%{$fg[cyan]%}.%{$fg[red]%})>%{$reset_color%}%b " 
 
