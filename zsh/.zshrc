@@ -58,6 +58,7 @@ setopt prompt_subst
 
 # Alias section
 alias vim=nvim
+alias emacs='emacs -nw'
 alias dotfiles='git --git-dir=$HOME/.config/dotfiles --work-tree=$HOME'
 alias tree='tree -L 2'
 alias py='python3'
