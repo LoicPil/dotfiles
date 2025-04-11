@@ -4,3 +4,6 @@
 [submodule "zsh-backup"]
 	path = zsh-backup
 	url = git@github.com:LoicPil/zsh-backup.git
+[submodule "zsh-backup/themes/powerlevel10k"]
+   	path = zsh-backup/themes/powerlevel10k
+    	url = https://github.com/romkatv/powerlevel10k.git
