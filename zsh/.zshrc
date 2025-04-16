@@ -41,3 +41,6 @@ alias la='ls -a'
 alias lla='ls -la'
 alias lt='ls --tree'
 alias cours='cd ~/Documents/Bac2Math/cours'
+alias gitst='git status'
+alias gitsts='git status -s'
+
