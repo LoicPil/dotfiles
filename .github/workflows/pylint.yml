@@ -1,3 +1,4 @@
+
 name: Pylint
 
 on: [push, pull_request]
@@ -27,8 +28,13 @@ jobs:
         run: |
           FILES=$(git ls-files '*.py')
           if [ -n "$FILES" ]; then
-            pylint $FILES
+            echo "Running pylint on the following files:"
+            echo "$FILES"
+            pylint $FILES || EXIT_CODE=$?
+            echo "Pylint finished with exit code $EXIT_CODE"
+            exit $EXIT_CODE
           else
             echo "No Python files found to lint."
           fi
+
 
