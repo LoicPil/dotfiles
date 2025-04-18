@@ -42,8 +42,10 @@ alias lla='ls -la'
 alias lt='ls --tree'
 # Personal alias
 alias cours='cd ~/Documents/Bac2Math/cours'
+  #Git alias
 alias gitst='git status'
 alias gitsts='git status -s'
+alias gitch='git checkout'
 alias vim=nvim
 alias update='sudo dnf update'
 
