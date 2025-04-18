@@ -9,6 +9,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9"]
+
     steps:
     - uses: actions/checkout@v4
 
@@ -22,9 +23,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint requests
 
-    - name: Analysing the code with pylint
+    - name: Get changed Python files
       run: |
-        pylint $(git ls-files '*.py') || true
+        # Get a list of all modified .py files in the commit
+        CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$')
+        echo "Changed files: $CHANGED_FILES"
+        echo "$CHANGED_FILES" > changed_files.txt
 
-
+    - name: Analysing the modified Python files with pylint
+      run: |
+        # Read the list of changed files and run pylint only on those
+        if [ -f changed_files.txt ]; then
+          CHANGED_FILES=$(cat changed_files.txt)
+          if [ ! -z "$CHANGED_FILES" ]; then
+            pylint $CHANGED_FILES
+          else
+            echo "No Python files changed, skipping pylint."
+          fi
+        fi
 
