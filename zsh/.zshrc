@@ -48,5 +48,5 @@ alias gitsts='git status -s'
 alias gitch='git checkout'
 alias vim=nvim
 alias update='sudo dnf update'
-
+alias settings='gnome-control-center'
 
