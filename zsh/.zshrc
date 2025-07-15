@@ -49,4 +49,6 @@ alias gitch='git checkout'
 alias vim=nvim
 alias update='sudo dnf update'
 alias settings='gnome-control-center'
+  # Sqlite3 alias 
+alias sqlite3='sqlite3 -cmd ".headers on" -cmd ".mode column"'
 
