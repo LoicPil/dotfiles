@@ -1,0 +1,14 @@
+# 🔗 GitHub
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_github_rsa        # ta clé GitHub RSA
+    IdentitiesOnly yes
+
+# 🖥️ Raspberry Pi Nas
+Host raspberrypiNas
+    HostName raspberrypiNas.local     # ou remplacer par IP locale fixe
+    User piletteloic
+    IdentityFile ~/.ssh/id_ed25519    # ta clé ED25519 pour le Raspberry Pi
+    IdentitiesOnly yes
+

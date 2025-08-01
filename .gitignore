@@ -1,1 +1,26 @@
-backup
+# Ignorer les dossiers de backup
+backup/
+zsh-backup/
+
+# Ignorer les clés privées SSH dans le dossier ssh/
+ssh/id_*
+ssh/*_rsa
+ssh/*_ed25519
+
+# Ne pas ignorer les clés publiques SSH (.pub)
+!ssh/*.pub
+
+# Ignorer les fichiers temporaires et de sauvegarde
+*.swp
+*.swo
+*~
+*.bak
+*.old
+
+# Ignorer fichiers logs
+*.log
+
+# Ignorer fichiers systèmes (macOS, Windows)
+.DS_Store
+Thumbs.db
+
