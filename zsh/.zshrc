@@ -51,4 +51,26 @@ alias update='sudo dnf update'
 alias settings='gnome-control-center'
   # Sqlite3 alias 
 alias sqlite3='sqlite3 -cmd ".headers on" -cmd ".mode column"'
+#BAckup command and module 
+backup() {
+  if [[ "$1" == "raspberry" ]]; then
+    rsync -avz --delete --progress --append-verify --delete-excluded \
+      --exclude='backup-fedora-piletteloic' \
+      --exclude='Elegant-grub2-themes' \
+      --exclude='Fedora-Hyprland' \
+      --exclude='.cache' \
+      --exclude='.local/share/Trash' \
+      --exclude='node_modules' \
+      --exclude='.gvfs' \
+      --exclude='.Trash-*' \
+      --exclude='.mozilla/firefox/*/cache2/' \
+      --exclude='.mozilla/firefox/*/cache2/*' \
+      --exclude='.mozilla/firefox/*/storage/default/https+++*' \
+      /home/piletteloic/ piletteloic@raspberrypiNas.local:/srv/dev-disk-by-uuid-b3490c84-bc7f-4788-a622-2e14d728d2be/backupLoic/ 2> ~/rsync_errors.log
+  else
+    echo "Usage: backup raspberry"
+  fi
+}
+
+
 
