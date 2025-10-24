@@ -2,7 +2,7 @@
 	email = piletteloic@gmail.com
 	name = Pilette Loïc
 [core]
-	editor = emacs -nw
+	editor = nvim
 [init]
 	defaultBranch = main
 [color]
