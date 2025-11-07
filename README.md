@@ -1,78 +1,178 @@
 # Dotfiles
 
-Ce repository contient mes fichiers de configuration (dotfiles) pour divers outils et environnements.
+This repository contains my configuration files (dotfiles) for various tools and environments, including Zsh, Neovim, Hyprland, Kitty, Rofi, and more.
+
+---
 
 ## Installation
 
-Pour cloner ce dépôt et appliquer les configurations :
-```bash
-# Cloner le dépôt
-git clone git@github.com:TON-UTILISATEUR/dotfiles.git ~/.dotfiles
+To clone this repository and apply the configurations:
 
-# Aller dans le dossier
+```bash
+# Clone the repository
+git clone git@github.com:LoicPil/dotfiles.git ~/.dotfiles
+
+# Go into the folder
 cd ~/.dotfiles
 
-# Exécuter le script d'installation (si disponible)
-./install.sh
+# Run the main installation script
+./bootstrap_dotfiles.sh
 ```
 
-## Connexion à GitHub avec une clé SSH
+You can also use the refresh scripts to update specific configurations:
 
-### 1. Vérifier les clés SSH existantes
-Avant de générer une nouvelle clé, vérifiez si vous en avez déjà une :
+```bash
+# Update specific dotfiles
+./bootstrap_refresh.sh
+
+# Update all dotfiles
+./bootstrap_refreshALL.sh
+```
+
+---
+
+## Connecting to GitHub with an SSH Key
+
+### 1. Check existing SSH keys
+
 ```bash
 ls -al ~/.ssh
 ```
-Si vous voyez un fichier comme `id_rsa.pub`, vous avez déjà une clé SSH.
 
-### 2. Générer une nouvelle clé SSH
-Si vous devez créer une nouvelle clé SSH, utilisez la commande suivante :
+If you see a file like `id_rsa.pub`, you already have an SSH key.
+
+### 2. Generate a new SSH key
+
 ```bash
-ssh-keygen -t rsa -b 4096 -C "votre-email@example.com"
+ssh-keygen -t rsa -b 4096 -C "your-email@example.com"
 ```
-- Lorsque demandé où enregistrer la clé, appuyez sur **Entrée** pour accepter l’emplacement par défaut (`~/.ssh/id_rsa`).
-- Définissez un **mot de passe sécurisé** pour protéger la clé.
 
-### 3. Ajouter la clé SSH à l'agent SSH
-Démarrer l’agent SSH et ajouter votre clé :
+* Press **Enter** to accept the default location (`~/.ssh/id_rsa`).
+* Set a strong passphrase to protect the key.
+
+### 3. Add the SSH key to the SSH agent
+
+The SSH agent keeps your private keys in memory, so you don’t have to type your passphrase every time you push.
+
 ```bash
+# Start the SSH agent
 eval "$(ssh-agent -s)"
+
+# Add your private key to the agent
 ssh-add ~/.ssh/id_rsa
 ```
 
-### 4. Ajouter la clé SSH à GitHub
-Copiez le contenu de votre clé publique :
+⚠️ Verify the key is loaded:
+
+```bash
+ssh-add -l
+```
+
+### 4. Add the SSH key to GitHub
+
 ```bash
 cat ~/.ssh/id_rsa.pub
 ```
-Puis ajoutez-la à GitHub :
-1. Allez sur [GitHub SSH Keys](https://github.com/settings/keys)
-2. Cliquez sur **New SSH Key**
-3. Collez la clé publique et sauvegardez.
 
-### 5. Tester la connexion
+* Copy the output and go to [GitHub SSH Keys](https://github.com/settings/keys)
+* Click **New SSH Key**
+* Paste the public key and save.
+
+### 5. Test the connection
+
 ```bash
 ssh -T git@github.com
 ```
-Si tout est configuré correctement, vous verrez un message :
+
+You should see a message like:
+
 ```
-Hi TON-UTILISATEUR! You've successfully authenticated, but GitHub does not provide shell access.
+Hi LoicPil! You've successfully authenticated, but GitHub does not provide shell access.
 ```
 
-## Utilisation de Git
-Une fois la connexion SSH établie, vous pouvez pousser vos modifications :
+### 6. Automatically Load SSH Agent at Startup
+
+To load your SSH key(s) automatically when opening a terminal, add the following to your `~/.zshrc` or `~/.bashrc`:
+
 ```bash
-# Ajouter les fichiers
+# Start SSH agent if not already running
+if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+    eval "$(ssh-agent -s)"
+fi
+
+# Add your SSH key(s)
+ssh-add ~/.ssh/id_rsa
+```
+
+### 7. Automatically Load Multiple SSH Keys
+
+If you use multiple keys (e.g., one for GitHub, one for work), update your shell configuration with:
+
+```bash
+# Start SSH agent if not already running
+if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+    eval "$(ssh-agent -s)"
+fi
+
+# Add multiple SSH keys
+KEYS=(~/.ssh/id_rsa ~/.ssh/id_ed25519 ~/.ssh/work_id_rsa)
+
+for key in "${KEYS[@]}"; do
+    if [ -f "$key" ]; then
+        ssh-add -q "$key" 2>/dev/null
+    fi
+done
+```
+
+* Replace the paths with the actual private keys you use.
+* `ssh-add -q` adds the keys quietly; errors are suppressed if a key is already added.
+
+Verify loaded keys with:
+
+```bash
+ssh-add -l
+```
+
+---
+
+## Using Git
+
+```bash
+# Add modified files
 git add .
 
-# Commiter les changements
-git commit -m "Mise à jour des dotfiles"
+# Commit changes
+git commit -m "Update dotfiles"
 
-# Pousser vers GitHub
+# Push to GitHub
 git push origin main
 ```
 
 ---
-**Note :** N'oubliez pas de garder une copie sécurisée de votre clé privée et de votre mot de passe. 😉
 
+## Repository Structure
 
+```
+backup/        # Previous configuration backups
+btop/          # btop configuration
+emacs/         # Emacs configs
+git/           # Git configuration
+hypr/          # Hyprland configs
+hypr-back/     # Hyprland backups
+kitty/         # Kitty configs
+nvim/          # Neovim configs
+oh-my-zsh/     # Oh My Zsh configuration
+rofi/          # Rofi configs
+swaync/        # Swaync configs
+vim/           # Vim configs
+wallust/       # Wallpapers
+waybar/        # Waybar configs
+wlogout/       # Wlogout configs
+zsh/           # Zsh configs
+zsh-backup/    # Zsh backup
+zshrc.bak      # Backup of .zshrc
+```
+
+---
+
+**Note:** Always keep a secure backup of your private keys and passphrases. 😉
