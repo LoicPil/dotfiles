@@ -51,3 +51,6 @@ alias update='sudo dnf update && flatpak update'
 alias settings='gnome-control-center'
   # Sqlite3 alias 
 alias sqlite3='sqlite3 -cmd ".headers on" -cmd ".mode column"'
+  #VPN 
+alias vpnup='sudo wg-quick up ~/wireguard/client-loicvpn.conf'
+alias vpndown='sudo wg-quick down ~/wireguard/client-loicvpn.conf'
