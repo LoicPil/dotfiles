@@ -11,15 +11,7 @@
 #                                                                #
 ##################################################################
 
-
-
-
-
-
-
-
 # This is for changing kb_layouts. Set kb_layouts in 
-
 MAP_FILE="$HOME/.cache/kb_layout_per_window"
 CFG_FILE="$HOME/.config/hypr/UserConfigs/UserSettings.conf"
 ICON="$HOME/.config/swaync/images/ja.png"
@@ -33,6 +25,7 @@ if ! grep -q 'kb_layout' "$CFG_FILE"; then
   echo "Error: cannot find kb_layout in $CFG_FILE" >&2
   exit 1
 fi
+
 kb_layouts=($(grep 'kb_layout' "$CFG_FILE" | cut -d '=' -f2 | tr -d '[:space:]' | tr ',' ' '))
 count=${#kb_layouts[@]}
 
@@ -86,6 +79,9 @@ cmd_toggle() {
   do_switch "$NEXT"
   save_map "$W" "${kb_layouts[NEXT]}"
   notify-send -u low -i "$ICON" "kb_layout: ${kb_layouts[NEXT]}"
+  
+  # Update waybar cache
+  echo "${kb_layouts[NEXT]}" > $HOME/.cache/kb_layout
 }
 
 # Restore layout on focus
@@ -96,6 +92,8 @@ cmd_restore() {
   for idx in "${!kb_layouts[@]}"; do
     if [[ "${kb_layouts[idx]}" == "$LAY" ]]; then
       do_switch "$idx"
+      # Update waybar cache
+      echo "$LAY" > $HOME/.cache/kb_layout
       break
     fi
   done
@@ -105,7 +103,6 @@ cmd_restore() {
 subscribe() {
   local SOCKET2="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
   [[ -S "$SOCKET2" ]] || { echo "Error: Hyprland socket not found." >&2; exit 1; }
-
   socat -u UNIX-CONNECT:"$SOCKET2" - | while read -r line; do
     [[ "$line" =~ ^activewindow ]] && cmd_restore
   done
