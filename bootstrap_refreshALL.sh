@@ -1,35 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CONFIG="$HOME/.config"
 DOTFILES="$HOME/dotfiles"
 BACKUP="$DOTFILES/backup/$(date +%Y%m%d)"
 
-mkdir -p "$BACKUP"
+echo "🔁 Sauvegarde de tous les dotfiles actuels..."
 
-# Détecte tous les dossiers réels dans ~/.config
-DIRS=($(find "$CONFIG" -mindepth 1 -maxdepth 1 -type d ! -lname '*'))
-
-echo "🔁 Synchronisation des nouveaux fichiers vers ~/dotfiles ..."
-for dirpath in "${DIRS[@]}"; do
-    dir=$(basename "$dirpath")
-    echo "→ $dir"
+# Trouve tous les dossiers dans ~/dotfiles (sauf backup, .git, etc.)
+cd "$DOTFILES"
+for dir in */; do
+    dir="${dir%/}"  # Remove trailing slash
     
-    # Sauvegarde existante dans dotfiles
-    if [ -d "$DOTFILES/$dir" ]; then
+    # Skip special directories
+    [[ "$dir" == "backup" ]] && continue
+    [[ "$dir" == ".git" ]] && continue
+    
+    if [ -d "$dir" ]; then
+        echo "→ Sauvegarde de $dir"
         mkdir -p "$BACKUP/$dir"
-        cp -r "$DOTFILES/$dir/"* "$BACKUP/$dir/" 2>/dev/null || true
+        cp -r "$dir/"* "$BACKUP/$dir/" 2>/dev/null || true
     fi
-    
-    # Mise à jour de dotfiles avec le nouveau contenu
-    mkdir -p "$DOTFILES/$dir"
-    rsync -av --delete "$CONFIG/$dir/" "$DOTFILES/$dir/"
-    
-    # Supprime l'ancien dossier local et recrée le lien
-    rm -rf "$CONFIG/$dir"
-    ln -s "$DOTFILES/$dir" "$CONFIG/$dir"
 done
 
-echo "✅ Synchronisation terminée."
-echo "Vérifie les liens : ls -l ~/.config | grep '->'"
-
+echo "✅ Sauvegarde terminée dans $BACKUP"
+echo "💡 Les changements sont déjà dans ~/dotfiles (via symlinks)"
+echo "   Utilise 'git status' pour voir les modifications"

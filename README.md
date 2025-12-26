@@ -19,15 +19,35 @@ cd ~/.dotfiles
 ./bootstrap_dotfiles.sh
 ```
 
-You can also use the refresh scripts to update specific configurations:
+### Bootstrap Scripts Explained
 
+**bootstrap_dotfiles.sh** - Initial setup (run once on a new system)
+- Copies your existing configs to `~/dotfiles/`
+- Creates symlinks: `~/.config/hypr` → `~/dotfiles/hypr`
+- Backs up originals with timestamp
+
+**bootstrap_refresh.sh** - Update after external changes
+- Use when you install updated configs (e.g., new JaKooLit Hyprland version)
+- Detects new real directories in `~/.config/`
+- Backs up old versions, copies new configs, recreates symlinks
+- Run this after any external script that overwrites your configs
+
+**bootstrap_refreshALL.sh** - Backup all configs
+- Creates dated backups of all dotfiles
+- Use before system updates or major experiments
+
+**Workflow after updating configs externally:**
 ```bash
-# Update specific dotfiles
+# After JaKooLit (or similar) installs new configs
+cd ~/dotfiles
 ./bootstrap_refresh.sh
-
-# Update all dotfiles
-./bootstrap_refreshALL.sh
+git status  # See what changed
+git add .
+git commit -m "Update Hyprland to new version"
+git push
 ```
+
+**Note:** When you manually edit configs, changes are automatic (via symlinks). Only use refresh scripts when external installers create new directories.
 
 ---
 
