@@ -1,0 +1,14 @@
+com.brave.Browser
+com.discordapp.Discord
+com.github.jeromerobert.pdfarranger
+com.jetbrains.IntelliJ-IDEA-Ultimate
+com.jetbrains.PyCharm-Professional
+com.spotify.Client
+com.warlordsoftwares.youtube-downloader-4ktube
+io.github.brunofin.Cohesion
+io.gitlab.news_flash.NewsFlash
+net.krafting.HexColordle
+net.sourceforge.QtSpim
+org.gnome.Sudoku
+org.gnome.World.PikaBackup
+org.jousse.vincent.Pomodorolm
