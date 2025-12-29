@@ -1,233 +1,250 @@
 # Dotfiles
 
-This repository contains my configuration files (dotfiles) for various tools and environments, including Zsh, Neovim, Hyprland, Kitty, Rofi, and more.
+My personal configuration files for Fedora Workstation with Hyprland, including Zsh, Neovim, Kitty, Rofi, Waybar, and more.
 
 ---
 
-## Installation
+## 🚀 Quick Start
 
-To clone this repository and apply the configurations:
+### Installation on a New System
 
 ```bash
 # Clone the repository
-git clone git@github.com:LoicPil/dotfiles.git ~/.dotfiles
+git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
 
-# Go into the folder
-cd ~/.dotfiles
-
-# Run the main installation script
-./bootstrap_dotfiles.sh
-```
-
-### Bootstrap Scripts Explained
-
-**bootstrap_dotfiles.sh** - Initial setup (run once on a new system)
-- Copies your existing configs to `~/dotfiles/`
-- Creates symlinks: `~/.config/hypr` → `~/dotfiles/hypr`
-- Backs up originals with timestamp
-
-**bootstrap_refresh.sh** - Update after external changes
-- Use when you install updated configs (e.g., new JaKooLit Hyprland version)
-- Detects new real directories in `~/.config/`
-- Backs up old versions, copies new configs, recreates symlinks
-- Run this after any external script that overwrites your configs
-
-**bootstrap_refreshALL.sh** - Backup all configs
-- Creates dated backups of all dotfiles
-- Use before system updates or major experiments
-
-**Workflow after updating configs externally:**
-```bash
-# After JaKooLit (or similar) installs new configs
+# Navigate to the directory
 cd ~/dotfiles
-./bootstrap_refresh.sh
-git status  # See what changed
-git add .
-git commit -m "Update Hyprland to new version"
-git push
+
+# Initialize submodules (oh-my-zsh, etc.)
+git submodule update --init --recursive
+
+# Install dotfiles (creates symlinks)
+./install.sh
+
+# Optional: Install all packages from backup
+sudo dnf install $(cat packages.txt)
 ```
 
-**Note:** When you manually edit configs, changes are automatic (via symlinks). Only use refresh scripts when external installers create new directories.
+### Uninstallation
+
+To remove all dotfiles symlinks:
+
+```bash
+cd ~/dotfiles
+./uninstall.sh
+```
 
 ---
 
-## Package Management
+## 📦 Package Management
 
-### Backup Installed Packages
+### Update Package Lists
 
-To update your package list with currently installed packages:
+Keep your package lists synchronized with your current system:
 
 ```bash
 cd ~/dotfiles
-dnf repoquery --userinstalled --qf "%{name}" | sort > packages.txt
-git add packages.txt
-git commit -m "Update package list"
-git push origin main
+./update-packages.sh
 ```
 
-### Restore Packages on a New System
+This updates both:
+- `packages.txt` - All user-installed DNF packages (628 packages)
+- `flatpaks-clean.txt` - All installed Flatpak applications (14 apps)
 
-After setting up a fresh Fedora installation and cloning this repository:
+### Restore Packages on a Fresh System
 
 ```bash
-# Install all packages from the list
+# Install DNF packages
 sudo dnf install $(cat ~/dotfiles/packages.txt)
 
-# Or if you encounter issues, install one by one:
-cat ~/dotfiles/packages.txt | xargs sudo dnf install -y
+# Install Flatpaks
+cat ~/dotfiles/flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
 ```
 
-**Note:** Some package names may differ between Fedora versions. If a package fails to install, you can search for its replacement:
+**Note:** Some package names may differ between Fedora versions. Use `dnf search <package>` to find replacements.
 
-```bash
-dnf search <package-name>
+---
+
+## 🔧 How It Works
+
+### Symlink Structure
+
+The install script creates symlinks from your home directory to the dotfiles repository:
+
+```
+~/.config/nvim    → ~/dotfiles/nvim
+~/.config/hypr    → ~/dotfiles/hypr
+~/.zshrc          → ~/dotfiles/zsh/.zshrc
+~/.gitconfig      → ~/dotfiles/git/gitconfig
+# etc...
+```
+
+This means:
+- ✅ Edit files in `~/dotfiles/` and changes apply immediately
+- ✅ All configs are version controlled
+- ✅ Easy to sync across multiple machines
+- ✅ Backups are created automatically before linking
+
+### Scripts Overview
+
+| Script | Purpose |
+|--------|---------|
+| `install.sh` | Creates symlinks and sets up dotfiles |
+| `uninstall.sh` | Removes all symlinks |
+| `update-packages.sh` | Updates package lists with currently installed packages |
+
+---
+
+## 📁 Repository Structure
+
+```
+dotfiles/
+├── backup/              # Timestamped backups (gitignored)
+├── btop/                # System monitor configuration
+├── emacs/               # Emacs configuration
+├── git/                 # Git configuration
+├── hypr/                # Hyprland window manager
+├── kitty/               # Kitty terminal emulator
+├── nvim/                # Neovim configuration
+├── oh-my-zsh/           # Oh My Zsh framework (submodule)
+├── rofi/                # Application launcher
+├── ssh/                 # SSH config (keys NOT tracked!)
+├── swaync/              # Notification daemon
+├── vim/                 # Vim configuration
+├── wallust/             # Wallpaper & color scheme manager
+├── waybar/              # Status bar
+├── wlogout/             # Logout menu
+├── zsh/                 # Zsh configuration
+├── flatpaks-clean.txt   # Flatpak applications list
+├── packages.txt         # DNF packages list
+├── install.sh           # Installation script
+├── uninstall.sh         # Uninstallation script
+└── update-packages.sh   # Package list updater
 ```
 
 ---
 
-## Connecting to GitHub with an SSH Key
+## 🔐 SSH Key Setup
 
-### 1. Check existing SSH keys
+### Generate SSH Key
 
 ```bash
-ls -al ~/.ssh
+ssh-keygen -t ed25519 -C "your-email@example.com"
 ```
 
-If you see a file like `id_rsa.pub` or `id_ed25519.pub`, you already have an SSH key.
-
-### 2. Generate a new SSH key
+### Add to SSH Agent
 
 ```bash
-ssh-keygen -t rsa -b 4096 -C "your-email@example.com"
-```
-
-* Press **Enter** to accept the default location (`~/.ssh/id_rsa`).
-* Set a strong passphrase to protect the key.
-
-### 3. Add the SSH key to the SSH agent
-
-The SSH agent keeps your private keys in memory, so you don't have to type your passphrase every time you push.
-
-```bash
-# Start the SSH agent
 eval "$(ssh-agent -s)"
-
-# Add your private key to the agent
-ssh-add ~/.ssh/id_ed25519  # or ~/.ssh/id_rsa if using RSA
+ssh-add ~/.ssh/id_ed25519
 ```
 
-⚠️ Verify the key is loaded:
+### Add to GitHub
 
 ```bash
-ssh-add -l
+cat ~/.ssh/id_ed25519.pub
 ```
 
-### 4. Add the SSH key to GitHub
+Copy the output and add it at [GitHub SSH Keys](https://github.com/settings/keys)
+
+### Auto-load SSH Keys at Startup
+
+Add to `~/.zshrc`:
 
 ```bash
-cat ~/.ssh/id_rsa.pub
+# Start SSH agent if not running
+if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+    eval "$(ssh-agent -s)"
+fi
+
+# Add SSH keys
+ssh-add ~/.ssh/id_ed25519 2>/dev/null
 ```
 
-* Copy the output and go to [GitHub SSH Keys](https://github.com/settings/keys)
-* Click **New SSH Key**
-* Paste the public key and save.
+For multiple keys:
 
-### 5. Test the connection
+```bash
+KEYS=(~/.ssh/id_ed25519 ~/.ssh/id_github_rsa)
+for key in "${KEYS[@]}"; do
+    [ -f "$key" ] && ssh-add -q "$key" 2>/dev/null
+done
+```
+
+### Test Connection
 
 ```bash
 ssh -T git@github.com
 ```
 
-You should see a message like:
-
-```
-Hi LoicPil! You've successfully authenticated, but GitHub does not provide shell access.
-```
-
-### 6. Automatically Load SSH Agent at Startup
-
-To load your SSH key(s) automatically when opening a terminal, add the following to your `~/.zshrc` or `~/.bashrc`:
-
-```bash
-# Start SSH agent if not already running
-if ! pgrep -u "$USER" ssh-agent > /dev/null; then
-    eval "$(ssh-agent -s)"
-fi
-
-# Add your SSH key(s)
-ssh-add ~/.ssh/id_ed25519 2>/dev/null  # or ~/.ssh/id_rsa
-```
-
-### 7. Automatically Load Multiple SSH Keys
-
-If you use multiple keys (e.g., one for GitHub, one for work), update your shell configuration with:
-
-```bash
-# Start SSH agent if not already running
-if ! pgrep -u "$USER" ssh-agent > /dev/null; then
-    eval "$(ssh-agent -s)"
-fi
-
-# Add multiple SSH keys
-KEYS=(~/.ssh/id_ed25519 ~/.ssh/id_github_rsa)
-
-for key in "${KEYS[@]}"; do
-    if [ -f "$key" ]; then
-        ssh-add -q "$key" 2>/dev/null
-    fi
-done
-```
-
-* Replace the paths with the actual private keys you use.
-* `ssh-add -q` adds the keys quietly; errors are suppressed if a key is already added.
-
-Verify loaded keys with:
-
-```bash
-ssh-add -l
-```
-
 ---
 
-## Using Git
+## 🔄 Daily Workflow
+
+### Making Changes
+
+Since configs are symlinked, just edit and commit:
 
 ```bash
-# Add modified files
+# Edit any config file
+nvim ~/dotfiles/hypr/hyprland.conf
+
+# Changes apply immediately (it's a symlink!)
+
+# Commit when satisfied
+cd ~/dotfiles
 git add .
+git commit -m "Update Hyprland keybinds"
+git push
+```
 
-# Commit changes
-git commit -m "Update dotfiles"
+### Syncing to Another Machine
 
-# Push to GitHub
-git push origin main
+```bash
+cd ~/dotfiles
+git pull
+# Changes apply immediately via symlinks
+```
+
+### Updating Package Lists
+
+```bash
+cd ~/dotfiles
+./update-packages.sh
+git add packages.txt flatpaks-clean.txt
+git commit -m "Update package lists"
+git push
 ```
 
 ---
 
-## Repository Structure
+## ⚠️ Important Notes
 
+- **SSH Keys**: Private keys are NOT tracked in git (see `.gitignore`)
+- **Backups**: Created automatically in `~/dotfiles/backup/` when running `install.sh`
+- **Oh-my-zsh**: Managed as a git submodule
+- **Package Lists**: Auto-generated - don't edit manually
+
+---
+
+## 🆘 Troubleshooting
+
+### Restore from Backup
+
+If something breaks, backups are in `~/dotfiles/backup/TIMESTAMP/`
+
+### Reinstall Dotfiles
+
+```bash
+./uninstall.sh
+./install.sh
 ```
-backup/        # Previous configuration backups
-btop/          # btop configuration
-emacs/         # Emacs configs
-git/           # Git configuration
-hypr/          # Hyprland configs
-hypr-back/     # Hyprland backups
-kitty/         # Kitty terminal configs
-nvim/          # Neovim configs
-oh-my-zsh/     # Oh My Zsh configuration
-rofi/          # Rofi launcher configs
-ssh/           # SSH configuration
-swaync/        # Swaync notification configs
-vim/           # Vim configs
-wallust/       # Wallpaper and color scheme configs
-waybar/        # Waybar configs
-wlogout/       # Wlogout logout menu configs
-zsh/           # Zsh configs
-zsh-backup/    # Zsh backup
-packages.txt   # List of installed Fedora packages
+
+### Check What's Linked
+
+```bash
+ls -la ~/.config/nvim  # Should show → /home/username/dotfiles/nvim
 ```
 
 ---
 
-**Note:** Always keep a secure backup of your private keys and passphrases. 😉
+**Keep your dotfiles safe and your system consistent!** 🎉
