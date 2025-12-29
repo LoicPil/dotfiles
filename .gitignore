@@ -23,4 +23,42 @@ ssh/*_ed25519
 # Ignorer fichiers systèmes (macOS, Windows)
 .DS_Store
 Thumbs.db
+# Backup directories
+backup/
+zsh-backup/
 
+# SSH private keys
+ssh/id_*
+ssh/*_rsa
+ssh/*_ed25519
+
+# Allow SSH public keys
+!ssh/*.pub
+
+# Temporary and backup files
+*.swp
+*.swo
+*~
+*.bak
+*.old
+
+# Log files
+*.log
+
+# System files (macOS, Windows)
+.DS_Store
+Thumbs.db
+
+# Emacs generated files
+emacs/auto-save-list/
+emacs/eln-cache/
+
+# Oh-my-zsh cache and logs
+oh-my-zsh/log/
+oh-my-zsh/cache/
+
+# Rofi current wallpaper symlink
+rofi/.current_wallpaper
+
+# Hypr initial startup flag
+hypr/.initial_startup_done
