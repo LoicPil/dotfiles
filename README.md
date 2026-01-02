@@ -4,38 +4,55 @@ My personal configuration files for Fedora Workstation with Hyprland, including 
 
 ---
 
+## 📋 Table of Contents
+
+- [Setting Up a New PC](#-setting-up-a-new-pc)
+- [Quick Start](#-quick-start-existing-installation)
+- [Package Management](#-package-management)
+- [Updating Configurations](#-updating-configurations)
+- [How It Works](#-how-it-works)
+- [Python Development](#-python-development-with-uv)
+- [SSH Key Setup](#-ssh-key-setup)
+- [Daily Workflow](#-daily-workflow)
+- [Troubleshooting](#-troubleshooting)
+
+---
+
 ## 🆕 Setting Up a New PC
 
 ### Full Installation (Recommended)
 
 **Do NOT manually install Hyprland first!** JaKooLit's script handles everything.
 
-1. **Install Fedora Workstation (fresh installation)**
+#### Step 1: Install Fedora Workstation
+Start with a fresh Fedora Workstation installation.
 
-2. **Install JaKooLit's Hyprland (handles all system setup)**
-   ```bash
-   # This installs Hyprland + all dependencies + system configs
-   git clone --depth=1 https://github.com/JaKooLit/Fedora-Hyprland.git
-   cd Fedora-Hyprland
-   ./install.sh
-   
-   # Reboot into Hyprland
-   sudo reboot
-   ```
+#### Step 2: Install JaKooLit's Hyprland
+This handles all system setup (Hyprland, SDDM, audio pipelines, systemd services, etc.):
 
-3. **Clone and install your dotfiles**
-   ```bash
-   # Clone your personal dotfiles
-   git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
-   cd ~/dotfiles
-   
-   # Install your packages
-   sudo dnf install $(cat packages.txt)
-   cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
-   
-   # Apply your configs (will backup JaKooLit's defaults automatically)
-   ./install.sh
-   ```
+```bash
+git clone --depth=1 https://github.com/JaKooLit/Fedora-Hyprland.git
+cd Fedora-Hyprland
+./install.sh
+
+# Reboot into Hyprland
+sudo reboot
+```
+
+#### Step 3: Clone and Install Your Dotfiles
+
+```bash
+# Clone your personal dotfiles
+git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+
+# Install your packages
+sudo dnf install $(cat packages.txt)
+cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
+
+# Apply your configs (automatically creates backups and symlinks)
+./install.sh
+```
 
 Your personalized Hyprland setup is now ready! 🎉
 
@@ -47,7 +64,7 @@ Your personalized Hyprland setup is now ready! 🎉
 git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
-# Install all packages (includes Hyprland)
+# Install all packages
 sudo dnf install $(cat packages.txt)
 cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
 
@@ -64,7 +81,8 @@ sudo reboot
 
 ## 📖 Complete Recovery Guide
 
-For detailed step-by-step instructions on setting up a new machine, including:
+For detailed step-by-step instructions on setting up a new machine:
+
 - ✅ Restoring SSH keys from Raspberry Pi backup
 - ✅ Recovering personal data (Documents, Pictures, Videos)
 - ✅ Complete installation checklist with proper order
@@ -84,8 +102,6 @@ This comprehensive guide includes everything you need to completely restore your
 ```bash
 # Clone the repository
 git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
-
-# Navigate to the directory
 cd ~/dotfiles
 
 # Install dotfiles (automatically initializes submodules and creates symlinks)
@@ -93,8 +109,6 @@ cd ~/dotfiles
 
 # Optional: Install all packages from backup
 sudo dnf install $(cat packages.txt)
-
-# Optional: Install Flatpak applications
 cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
 ```
 
@@ -138,42 +152,92 @@ cat ~/dotfiles/flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
 
 ---
 
-## 🔄 Updating Configs from External Scripts
+## 🔄 Updating Configurations
 
-### If you update Hyprland via JaKooLit or similar installers
+### Method 1: Automatic Updates via Waybar Button (Recommended)
 
-**First, check if your configs are still symlinked:**
+Your Waybar includes an automatic update checker that monitors JaKooLit's repository.
+
+#### How It Works
+
+1. **Click the update button** in Waybar
+2. Compares your local version with JaKooLit's GitHub
+3. Shows notification if update available
+4. One-click update process
+
+#### Update Process
+
+When you click **"Update"**:
+
 ```bash
-ls -la ~/.config/hypr
-# Should show: hypr -> /home/username/dotfiles/hypr
+# The system automatically:
+1. Opens Kitty terminal
+2. Updates ~/Hyprland-Dots (git pull)
+3. Runs upgrade-custom.sh from UserScripts/
+4. Creates backups in ~/dotfiles/backup/TIMESTAMP/
+5. Applies changes directly to your dotfiles (via symlinks)
 ```
 
-**Scenario 1: Configs are still symlinked (most common)**
+#### After Update: Review and Commit
 
-If the symlink is intact, changes from external installers go directly to your dotfiles:
+Since your configs are symlinked to `~/dotfiles/`, changes go directly there:
 
 ```bash
-# Changes are already in your dotfiles! Just commit:
+# Review what changed
 cd ~/dotfiles
 git status
+git diff
+
+# Commit and push
 git add .
-git commit -m "Update Hyprland from JaKooLit"
+git commit -m "Update from JaKooLit v2.X.X"
 git push
 ```
 
-**Scenario 2: Installer replaced the symlink with a real directory**
+#### What Gets Updated
 
-If an external installer removed the symlink and created a new directory:
+The script compares and updates these directories:
+- `hypr/` (excludes UserConfigs/ and UserScripts/)
+- `waybar/` (excludes your config and style.css)
+- `rofi/`, `kitty/`, `swaync/`, `wlogout/`, `wallust/`, etc.
+
+**Your personal files are NEVER touched:**
+- ✅ `hypr/UserConfigs/` - Safe
+- ✅ `hypr/UserScripts/` - Safe
+- ✅ `waybar/config` and `waybar/style.css` - Safe
+
+### Method 2: Manual Update
+
+Update manually from terminal:
 
 ```bash
-# Use the sync script to copy new configs to dotfiles
+# Update Hyprland-Dots
+cd ~/Hyprland-Dots
+git pull
+
+# Run the custom upgrade script
+~/.config/hypr/UserScripts/upgrade-custom.sh
+
+# Review and commit
+cd ~/dotfiles
+git status
+git add .
+git commit -m "Update from JaKooLit"
+git push
+```
+
+### Method 3: Sync After Broken Symlinks
+
+If an external installer breaks your symlinks:
+
+```bash
 cd ~/dotfiles
 ./sync-configs.sh
 
 # Review and commit the changes
 git status
 git add .
-git commit -m "Update configs from JaKooLit"
+git commit -m "Sync configs after external update"
 git push
 ```
 
@@ -193,33 +257,37 @@ The install script creates symlinks from your home directory to the dotfiles rep
 # etc...
 ```
 
-This means:
+**Benefits:**
 - ✅ Edit files in `~/dotfiles/` and changes apply immediately
 - ✅ All configs are version controlled
 - ✅ Easy to sync across multiple machines
-- ✅ Backups are created automatically before linking
+- ✅ Backups created automatically before any changes
 
 ### Scripts Overview
 
 | Script | Purpose |
 |--------|---------|
-| `install.sh` | Creates symlinks, initializes submodules, and sets up dotfiles |
+| `install.sh` | Creates symlinks, initializes submodules, sets up dotfiles |
 | `uninstall.sh` | Removes all symlinks |
 | `update-packages.sh` | Updates package lists with currently installed packages |
 | `sync-configs.sh` | Syncs configs after external installers break symlinks |
+| `hypr/scripts/KooLsDotsUpdate.sh` | Checks for updates from Waybar button |
+| `hypr/UserScripts/upgrade-custom.sh` | Custom upgrade script with dotfiles backup |
 
----
-
-## 📁 Repository Structure
+### Repository Structure
 
 ```
 dotfiles/
 ├── backup/              # Timestamped backups (gitignored)
+├── Upgrade-Logs/        # Update logs (gitignored)
 ├── btop/                # System monitor configuration
 ├── consign/             # Complete recovery & installation guide
 ├── emacs/               # Emacs configuration
 ├── git/                 # Git configuration
 ├── hypr/                # Hyprland window manager
+│   ├── UserConfigs/     # Your personal Hyprland settings (preserved during updates)
+│   ├── UserScripts/     # Your custom scripts (preserved during updates)
+│   └── scripts/         # System scripts
 ├── kitty/               # Kitty terminal emulator
 ├── nvim/                # Neovim configuration
 ├── oh-my-zsh/           # Oh My Zsh framework (submodule)
@@ -265,7 +333,7 @@ cd ~/my-python-project
 # Initialize UV project (creates pyproject.toml and virtual environment)
 uv init
 
-# Or create with specific Python version
+# Or with specific Python version
 uv init --python 3.12
 ```
 
@@ -278,31 +346,18 @@ uv add requests pandas numpy
 # Add development dependencies
 uv add --dev pytest black ruff
 
-# Install all dependencies from pyproject.toml
+# Install all dependencies
 uv sync
 
-# Run Python with the virtual environment
+# Run Python with virtual environment
 uv run python script.py
 
-# Run a specific command
+# Run specific commands
 uv run pytest
 uv run black .
 
-# Activate the virtual environment manually (if needed)
+# Activate virtual environment manually (if needed)
 source .venv/bin/activate
-```
-
-### UV Project Structure
-
-After running `uv init`, you'll have:
-
-```
-my-python-project/
-├── .venv/              # Virtual environment (auto-created)
-├── pyproject.toml      # Project configuration and dependencies
-├── README.md           # Project documentation
-└── src/                # Your source code
-    └── __init__.py
 ```
 
 ### Common UV Commands
@@ -443,59 +498,148 @@ git push
 ## ⚠️ Important Notes
 
 - **SSH Keys**: Private keys are NOT tracked in git (see `.gitignore`)
-- **Backups**: Created automatically in `~/dotfiles/backup/TIMESTAMP/` when running `install.sh`
+- **Backups**: Created automatically in `~/dotfiles/backup/TIMESTAMP/` during updates
+- **Update Logs**: Saved in `~/dotfiles/Upgrade-Logs/`
 - **Oh-my-zsh**: Managed as a git submodule (automatically initialized by `install.sh`)
 - **Package Lists**: Auto-generated by `update-packages.sh` - don't edit manually
-- **External Installers**: Use `sync-configs.sh` if installers like JaKooLit break your symlinks
+- **Protected Configs**: UserConfigs/, UserScripts/, and personal waybar styles are never overwritten
 - **JaKooLit First**: Always install JaKooLit's Hyprland setup before applying your dotfiles on a new system
-- **Recovery Guide**: See `consign/README.md` for complete system recovery instructions
+- **Version Tracking**: File `hypr/v2.X.X` tracks your current Hyprland dots version
 
 ---
 
 ## 🆘 Troubleshooting
 
+### Update Issues
+
+**"No update available" message**
+```bash
+# You're already on the latest version
+# Check manually:
+ls ~/Hyprland-Dots/config/hypr/v*
+```
+
+**Want to skip specific updates**
+- The upgrade script asks confirmation for each directory
+- Simply answer "N" for directories you don't want to update
+
 ### Restore from Backup
 
-If something breaks, backups are in `~/dotfiles/backup/TIMESTAMP/`
+**List available backups:**
+```bash
+ls ~/dotfiles/backup/
+```
+
+**Restore specific config:**
+```bash
+# Restore from backup
+cp -r ~/dotfiles/backup/TIMESTAMP/hypr ~/dotfiles/
+
+# Commit the restoration
+cd ~/dotfiles
+git add .
+git commit -m "Restore hypr config from backup"
+git push
+```
 
 ### Reinstall Dotfiles
 
 ```bash
+cd ~/dotfiles
 ./uninstall.sh
 ./install.sh
 ```
 
-### Check What's Linked
+### Check Symlinks
 
 ```bash
-ls -la ~/.config/nvim  # Should show → /home/username/dotfiles/nvim
+# Verify symlinks are correct
+ls -la ~/.config/nvim   # Should show → /home/username/dotfiles/nvim
+ls -la ~/.config/hypr   # Should show → /home/username/dotfiles/hypr
 ```
 
 ### After External Installer Breaks Symlinks
 
 ```bash
+cd ~/dotfiles
 ./sync-configs.sh
 ```
 
 ### Hyprland Won't Start
 
 If you installed dotfiles without JaKooLit first:
-1. Install JaKooLit's Hyprland
-2. Reboot
+
+1. Install JaKooLit's Hyprland setup
+2. Reboot into Hyprland
 3. Run `./install.sh` again to apply your configs
+
+### View Update Logs
+
+```bash
+# View recent update logs
+ls ~/dotfiles/Upgrade-Logs/
+cat ~/dotfiles/Upgrade-Logs/upgrade-*.log
+```
 
 ---
 
 ## 📚 Additional Resources
 
 - **[Complete Recovery Guide](consign/README.md)** - Detailed instructions for fresh installations and data recovery
-- [JaKooLit's Fedora-Hyprland](https://github.com/JaKooLit/Fedora-Hyprland)
-- [Hyprland Wiki](https://wiki.hyprland.org/)
-- [UV Documentation](https://github.com/astral-sh/uv)
-- [Oh My Zsh](https://ohmyz.sh/)
+- [JaKooLit's Fedora-Hyprland](https://github.com/JaKooLit/Fedora-Hyprland) - System installation
+- [JaKooLit's Hyprland-Dots](https://github.com/JaKooLit/Hyprland-Dots) - Upstream configurations
+- [Hyprland Wiki](https://wiki.hyprland.org/) - Official documentation
+- [UV Documentation](https://github.com/astral-sh/uv) - Python package manager
+- [Oh My Zsh](https://ohmyz.sh/) - Zsh framework
 
 ---
 
-**Backup Location:** `smb://raspberrypinas.local/backuploic/backup-laptop-piletteloic`
+## 💾 Backup Information
+
+**Primary Backup Location:** `smb://raspberrypinas.local/backuploic/backup-laptop-piletteloic`
+
+**Local Backups:**
+- Configuration backups: `~/dotfiles/backup/TIMESTAMP/`
+- Update logs: `~/dotfiles/Upgrade-Logs/`
+
+---
+
+## 🎯 Quick Reference
+
+### First-Time Setup
+```bash
+# 1. Install JaKooLit's Hyprland
+git clone --depth=1 https://github.com/JaKooLit/Fedora-Hyprland.git
+cd Fedora-Hyprland && ./install.sh && sudo reboot
+
+# 2. Install your dotfiles
+git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
+cd ~/dotfiles && ./install.sh
+```
+
+### Daily Usage
+```bash
+# Update from Waybar button → Click update button
+# OR manually:
+cd ~/Hyprland-Dots && git pull
+~/.config/hypr/UserScripts/upgrade-custom.sh
+
+# Then commit changes:
+cd ~/dotfiles && git status && git add . && git commit -m "Update" && git push
+```
+
+### Maintenance
+```bash
+# Update package lists
+cd ~/dotfiles && ./update-packages.sh
+
+# Reinstall dotfiles
+cd ~/dotfiles && ./uninstall.sh && ./install.sh
+
+# Restore from backup
+cp -r ~/dotfiles/backup/TIMESTAMP/config ~/dotfiles/
+```
+
+---
 
 **Keep your dotfiles safe and your system consistent!** 🎉
