@@ -48,7 +48,7 @@ else
           cd $KooL_Dots_DIR &&
           git stash &&
           git pull &&
-          ./copy.sh &&
+          ./upgrade.sh &&
 		  notify-send -u critical -i "$iDIR/ja.png" 'Update Completed:' 'Kindly log out and relogin to take effect'
         "
 	
@@ -61,7 +61,7 @@ else
           git clone --depth=1 https://github.com/JaKooLit/Hyprland-Dots.git $KooL_Dots_DIR &&
           cd $KooL_Dots_DIR &&
           chmod +x copy.sh &&
-          ./copy.sh &&
+          ./upgrade.sh &&
 		  notify-send -u critical -i "$iDIR/ja.png" 'Update Completed:' 'Kindly log out and relogin to take effect'
         "
       fi
