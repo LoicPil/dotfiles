@@ -17,7 +17,6 @@ source $ZSH/oh-my-zsh.sh
 # check the dnf plugins commands here
 # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/dnf
 
-
 # Display Pokemon-colorscripts
 # Project page: https://gitlab.com/phoneybadger/pokemon-colorscripts#on-other-distros-and-macos
 #pokemon-colorscripts --no-title -s -r #without fastfetch
@@ -34,23 +33,40 @@ HISTSIZE=10000
 SAVEHIST=10000
 setopt appendhistory
 
+# ===================================
+# Aliases
+# ===================================
+
 # Set-up icons for files/directories in terminal using lsd
 alias ls='lsd'
 alias l='ls -l'
 alias la='ls -a'
 alias lla='ls -la'
 alias lt='ls --tree'
+
 # Personal alias
 alias cours='cd ~/Documents/Bac3Math/cours'
-  #Git alias
+
+# Git alias
 alias gitst='git status'
 alias gitsts='git status -s'
 alias gitch='git checkout'
 alias vim=nvim
 alias update='sudo dnf update && flatpak update'
 alias settings='gnome-control-center'
-  # Sqlite3 alias 
+
+# Sqlite3 alias 
 alias sqlite3='sqlite3 -cmd ".headers on" -cmd ".mode column"'
-  #VPN 
+
+# VPN 
 alias vpnup='sudo wg-quick up ~/wireguard/client-loicvpn.conf'
 alias vpndown='sudo wg-quick down ~/wireguard/client-loicvpn.conf'
+
+# ===================================
+# Development Tools
+# ===================================
+
+# Rust/Cargo
+if [ -f "$HOME/.cargo/env" ]; then
+    . "$HOME/.cargo/env"
+fi
