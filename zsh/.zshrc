@@ -70,3 +70,22 @@ alias vpndown='sudo wg-quick down ~/wireguard/client-loicvpn.conf'
 if [ -f "$HOME/.cargo/env" ]; then
     . "$HOME/.cargo/env"
 fi
+
+# ===================================
+# SSH Agent - Auto-start and load keys
+# ===================================
+if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+    eval "$(ssh-agent -s)" > /dev/null
+fi
+
+# Add SSH keys
+SSH_KEYS=(
+    "$HOME/dotfiles/ssh/id_ed25519"
+    "$HOME/dotfiles/ssh/id_github_rsa"
+)
+
+for key in "${SSH_KEYS[@]}"; do
+    if [ -f "$key" ]; then
+        ssh-add -q "$key" 2>/dev/null
+    fi
+done
