@@ -11,7 +11,9 @@ My personal configuration files for Fedora Workstation with Hyprland, including 
 - [Package Management](#-package-management)
 - [Updating Configurations](#-updating-configurations)
 - [How It Works](#-how-it-works)
-- [Python Development](#-python-development-with-uv)
+- [Development Tools](#-development-tools)
+  - [Python with UV](#python-development-with-uv)
+  - [Rust](#rust-development)
 - [SSH Key Setup](#-ssh-key-setup)
 - [Daily Workflow](#-daily-workflow)
 - [Troubleshooting](#-troubleshooting)
@@ -52,6 +54,17 @@ cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
 
 # Apply your configs (automatically creates backups and symlinks)
 ./install.sh
+```
+
+#### Step 4: Install Development Tools (Optional)
+
+```bash
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source ~/.cargo/env
+
+# Install UV (Python package manager)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 Your personalized Hyprland setup is now ready! 🎉
@@ -309,11 +322,13 @@ dotfiles/
 
 ---
 
-## 🐍 Python Development with UV
+## 🛠️ Development Tools
+
+### Python Development with UV
 
 [UV](https://github.com/astral-sh/uv) is a fast Python package installer and resolver.
 
-### Install UV
+#### Install UV
 
 ```bash
 # Install UV
@@ -323,7 +338,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 pip install uv
 ```
 
-### Initialize a New Python Project
+#### Initialize a New Python Project
 
 ```bash
 # Create a new project directory
@@ -337,7 +352,7 @@ uv init
 uv init --python 3.12
 ```
 
-### Working with UV
+#### Working with UV
 
 ```bash
 # Add dependencies
@@ -360,7 +375,7 @@ uv run black .
 source .venv/bin/activate
 ```
 
-### Common UV Commands
+#### Common UV Commands
 
 ```bash
 uv add <package>        # Add a package
@@ -372,12 +387,12 @@ uv pip freeze           # Export dependencies
 uv lock                 # Update lockfile
 ```
 
-### Example: Quick Python Script
+#### Example: Quick Python Script
 
 ```bash
 # Create new project
-mkdir ~/scripts/data-analysis
-cd ~/scripts/data-analysis
+mkdir ~/projects/data-analysis
+cd ~/projects/data-analysis
 
 # Initialize with UV
 uv init
@@ -399,6 +414,166 @@ EOF
 # Run it
 uv run python analyze.py
 ```
+
+---
+
+### Rust Development
+
+[Rust](https://www.rust-lang.org/) is a systems programming language focused on safety, speed, and concurrency.
+
+#### Install Rust
+
+Rust is installed via `rustup`, which manages Rust versions and associated tools:
+
+```bash
+# Install Rust (interactive installer)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Reload shell to use Rust
+source ~/.cargo/env
+
+# Verify installation
+rustc --version
+cargo --version
+```
+
+**What gets installed:**
+- `~/.cargo/` - Cargo home directory (packages and binaries)
+- `~/.rustup/` - Rustup home directory (Rust toolchains)
+
+#### Creating a New Rust Project
+
+```bash
+# Create a new binary project
+mkdir ~/projects
+cd ~/projects
+cargo new my-app
+
+# This creates:
+# my-app/
+# ├── Cargo.toml       # Project manifest
+# └── src/
+#     └── main.rs      # Main source file
+```
+
+#### Working with Cargo
+
+```bash
+# Create a new project
+cargo new project-name       # Binary (application)
+cargo new --lib library-name # Library
+
+# Build and run
+cd project-name
+cargo build                  # Build in debug mode
+cargo build --release        # Build optimized
+cargo run                    # Build and run
+cargo run -- arg1 arg2       # Run with arguments
+
+# Testing and checking
+cargo test                   # Run tests
+cargo check                  # Check code without building
+cargo clippy                 # Run linter
+cargo fmt                    # Format code
+
+# Dependencies
+cargo add serde              # Add a dependency
+cargo remove serde           # Remove a dependency
+cargo update                 # Update dependencies
+```
+
+#### Common Cargo Commands
+
+```bash
+cargo new <name>             # Create new project
+cargo build                  # Build project
+cargo run                    # Build and run
+cargo test                   # Run tests
+cargo check                  # Fast compile check
+cargo clippy                 # Linting
+cargo fmt                    # Format code
+cargo clean                  # Clean build artifacts
+cargo doc --open             # Generate and open docs
+```
+
+#### Example: Hello World
+
+```bash
+# Create a new project
+cd ~/projects
+cargo new hello-rust
+cd hello-rust
+
+# Edit src/main.rs
+cat > src/main.rs << 'EOF'
+fn main() {
+    println!("Hello, Rust!");
+    
+    let name = "World";
+    println!("Hello, {}!", name);
+}
+EOF
+
+# Run it
+cargo run
+```
+
+#### Example: Project with Dependencies
+
+```bash
+# Create a project
+cargo new json-parser
+cd json-parser
+
+# Add a dependency
+cargo add serde serde_json
+
+# Edit src/main.rs
+cat > src/main.rs << 'EOF'
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Person {
+    name: String,
+    age: u32,
+}
+
+fn main() {
+    let person = Person {
+        name: "Alice".to_string(),
+        age: 30,
+    };
+    
+    // Serialize to JSON
+    let json = serde_json::to_string(&person).unwrap();
+    println!("JSON: {}", json);
+    
+    // Deserialize from JSON
+    let parsed: Person = serde_json::from_str(&json).unwrap();
+    println!("Parsed: {:?}", parsed);
+}
+EOF
+
+# Run it
+cargo run
+```
+
+#### Updating Rust
+
+```bash
+# Update Rust toolchain
+rustup update
+
+# Check current version
+rustc --version
+```
+
+#### Useful Resources
+
+- [The Rust Book](https://doc.rust-lang.org/book/) - Official learning resource
+- [Rust by Example](https://doc.rust-lang.org/rust-by-example/) - Learn by examples
+- [Cargo Book](https://doc.rust-lang.org/cargo/) - Cargo documentation
+- [crates.io](https://crates.io/) - Rust package registry
 
 ---
 
@@ -505,6 +680,7 @@ git push
 - **Protected Configs**: UserConfigs/, UserScripts/, and personal waybar styles are never overwritten
 - **JaKooLit First**: Always install JaKooLit's Hyprland setup before applying your dotfiles on a new system
 - **Version Tracking**: File `hypr/v2.X.X` tracks your current Hyprland dots version
+- **Development Tools**: Rust and UV are installed in user directories (`~/.cargo/` and `~/.local/`)
 
 ---
 
@@ -581,15 +757,40 @@ ls ~/dotfiles/Upgrade-Logs/
 cat ~/dotfiles/Upgrade-Logs/upgrade-*.log
 ```
 
+### Development Tools Issues
+
+**Rust not found after restart**
+```bash
+# Make sure Rust is in PATH
+source ~/.cargo/env
+
+# Or restart shell
+exec zsh
+```
+
+**UV not found**
+```bash
+# Reinstall UV
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
 ---
 
 ## 📚 Additional Resources
 
+### Dotfiles & Hyprland
 - **[Complete Recovery Guide](consign/README.md)** - Detailed instructions for fresh installations and data recovery
 - [JaKooLit's Fedora-Hyprland](https://github.com/JaKooLit/Fedora-Hyprland) - System installation
 - [JaKooLit's Hyprland-Dots](https://github.com/JaKooLit/Hyprland-Dots) - Upstream configurations
 - [Hyprland Wiki](https://wiki.hyprland.org/) - Official documentation
+
+### Development Tools
 - [UV Documentation](https://github.com/astral-sh/uv) - Python package manager
+- [The Rust Book](https://doc.rust-lang.org/book/) - Learn Rust
+- [Rust by Example](https://doc.rust-lang.org/rust-by-example/) - Practical examples
+- [crates.io](https://crates.io/) - Rust packages
+
+### Shell & Config
 - [Oh My Zsh](https://ohmyz.sh/) - Zsh framework
 
 ---
@@ -601,6 +802,10 @@ cat ~/dotfiles/Upgrade-Logs/upgrade-*.log
 **Local Backups:**
 - Configuration backups: `~/dotfiles/backup/TIMESTAMP/`
 - Update logs: `~/dotfiles/Upgrade-Logs/`
+
+**Development Tools:**
+- Rust: `~/.cargo/` and `~/.rustup/` (not backed up)
+- UV: `~/.local/share/uv/` (not backed up)
 
 ---
 
@@ -615,6 +820,10 @@ cd Fedora-Hyprland && ./install.sh && sudo reboot
 # 2. Install your dotfiles
 git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
 cd ~/dotfiles && ./install.sh
+
+# 3. Install development tools (optional)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ### Daily Usage
@@ -628,6 +837,17 @@ cd ~/Hyprland-Dots && git pull
 cd ~/dotfiles && git status && git add . && git commit -m "Update" && git push
 ```
 
+### Development
+```bash
+# Python project
+cd ~/projects && uv init my-project && cd my-project
+uv add requests && uv run python script.py
+
+# Rust project
+cd ~/projects && cargo new my-app && cd my-app
+cargo run
+```
+
 ### Maintenance
 ```bash
 # Update package lists
@@ -638,6 +858,9 @@ cd ~/dotfiles && ./uninstall.sh && ./install.sh
 
 # Restore from backup
 cp -r ~/dotfiles/backup/TIMESTAMP/config ~/dotfiles/
+
+# Update development tools
+rustup update  # Update Rust
 ```
 
 ---
