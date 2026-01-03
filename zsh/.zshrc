@@ -2,7 +2,6 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 export ZSH="$HOME/.oh-my-zsh"
-
 ZSH_THEME="agnosterzak"
 
 plugins=( 
@@ -20,8 +19,7 @@ source $ZSH/oh-my-zsh.sh
 # Display Pokemon-colorscripts
 # Project page: https://gitlab.com/phoneybadger/pokemon-colorscripts#on-other-distros-and-macos
 #pokemon-colorscripts --no-title -s -r #without fastfetch
-pokemon-colorscripts --no-title -s -r
-fastfetch -c $HOME/.config/fastfetch/config-pokemon.jsonc --logo-type file-raw --logo-height 10 --logo-width 5 --logo -
+pokemon-colorscripts --no-title -s -r | fastfetch -c $HOME/.config/fastfetch/config-pokemon.jsonc --logo-type file-raw --logo-height 10 --logo-width 5 --logo -
 
 # fastfetch. Will be disabled if above colorscript was chosen to install
 #fastfetch -c $HOME/.config/fastfetch/config-compact.jsonc
@@ -74,26 +72,11 @@ fi
 
 # ===================================
 # SSH Agent - Auto-start and load keys
-# This ensures a single global agent is used across all terminals, keys are added automatically
 # ===================================
-SSH_ENV="$HOME/.ssh/agent.env"
-
-function start_agent {
-    ssh-agent | sed 's/^echo/#echo/' > "$SSH_ENV"
-    chmod 600 "$SSH_ENV"
-    . "$SSH_ENV" > /dev/null
-}
-
-if [ -f "$SSH_ENV" ]; then
-    . "$SSH_ENV" > /dev/null
-    if ! ssh-add -l >/dev/null 2>&1; then
-        start_agent
-    fi
-else
-    start_agent
+if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+    eval "$(ssh-agent -s)" > /dev/null
 fi
 
-# Add SSH keys
 SSH_KEYS=(
     "$HOME/dotfiles/ssh/id_ed25519"
     "$HOME/dotfiles/ssh/id_github_rsa"
@@ -101,6 +84,7 @@ SSH_KEYS=(
 
 for key in "${SSH_KEYS[@]}"; do
     if [ -f "$key" ]; then
-        ssh-add "$key"
+        ssh-add -q "$key" 2>/dev/null
     fi
 done
+
