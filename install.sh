@@ -103,7 +103,29 @@ link_file "$DOTFILES_DIR/btop" "$CONFIG_DIR/btop"
 # Git
 echo -e "\n${BLUE}Configuration Git...${NC}"
 link_file "$DOTFILES_DIR/git/gitconfig" "$HOME/.gitconfig"
+# Fastfetch
+echo -e "\n${BLUE}Configuration Fastfetch...${NC}"
+link_file "$DOTFILES_DIR/fastfetch" "$CONFIG_DIR/fastfetch"
 
+# Cava
+echo -e "\n${BLUE}Configuration Cava...${NC}"
+link_file "$DOTFILES_DIR/cava" "$CONFIG_DIR/cava"
+
+# Kvantum
+echo -e "\n${BLUE}Configuration Kvantum...${NC}"
+link_file "$DOTFILES_DIR/Kvantum" "$CONFIG_DIR/Kvantum"
+
+# Qt5ct
+echo -e "\n${BLUE}Configuration Qt5ct...${NC}"
+link_file "$DOTFILES_DIR/qt5ct" "$CONFIG_DIR/qt5ct"
+
+# Qt6ct
+echo -e "\n${BLUE}Configuration Qt6ct...${NC}"
+link_file "$DOTFILES_DIR/qt6ct" "$CONFIG_DIR/qt6ct"
+
+# Swappy
+echo -e "\n${BLUE}Configuration Swappy...${NC}"
+link_file "$DOTFILES_DIR/swappy" "$CONFIG_DIR/swappy"
 # SSH (config only, not keys!)
 echo -e "\n${BLUE}Configuration SSH...${NC}"
 mkdir -p "$HOME/.ssh"

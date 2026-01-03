@@ -73,7 +73,12 @@ sync_config "wlogout" && SYNCED=1
 sync_config "swaync" && SYNCED=1
 sync_config "wallust" && SYNCED=1
 sync_config "btop" && SYNCED=1
-
+sync_config "fastfetch" && SYNCED=1
+sync_config "cava" && SYNCED=1
+sync_config "Kvantum" && SYNCED=1
+sync_config "qt5ct" && SYNCED=1
+sync_config "qt6ct" && SYNCED=1
+sync_config "swappy" && SYNCED=1
 if [ $SYNCED -eq 1 ]; then
     echo -e "\n${GREEN}✅ Sync complete!${NC}"
     echo -e "${BLUE}📁 Old configs backed up to: $BACKUP_DIR${NC}"
