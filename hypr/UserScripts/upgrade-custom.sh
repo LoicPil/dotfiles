@@ -143,7 +143,7 @@ create_backup() {
 }
 
 # Check if the version file exists in target directory, if not exit
-target_version_file=$(find "$target_dir/hypr" -name 'v*' | sort -V | tail -n 1)
+target_version_file=$(find -L "$target_dir/hypr" -name 'v*' | sort -V | tail -n 1)
 if [ -z "$target_version_file" ]; then
     echo "$ERROR Version number not found in ~/.config/hypr/" 2>&1 | tee -a "$LOG"
     echo "$ERROR Run install.sh from your dotfiles first" 2>&1 | tee -a "$LOG"
