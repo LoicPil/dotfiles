@@ -1,0 +1,35 @@
+# Manual Installations
+# ====================
+# Outils installés via curl (non gérés par DNF/Flatpak)
+# Note: UV et Rust sont déjà documentés dans le README principal
+
+# =============================
+# BETTERDISCORD
+# =============================
+
+## BetterDiscord Controller
+curl -O https://raw.githubusercontent.com/bb010g/betterdiscordctl/master/betterdiscordctl
+chmod +x betterdiscordctl
+sudo mv betterdiscordctl /usr/local/bin/
+
+## BetterDiscord Theme: System24
+# Note: Utilise 'main' et non 'master'
+curl -L -o ~/.var/app/com.discordapp.Discord/config/BetterDiscord/themes/system24.theme.css https://raw.githubusercontent.com/refact0r/system24/main/theme/system24.theme.css
+
+## BetterDiscord Plugin: ZeresPluginLibrary
+curl -L -o ~/.var/app/com.discordapp.Discord/config/BetterDiscord/plugins/0PluginLibrary.plugin.js https://raw.githubusercontent.com/zerebos/BetterDiscordAddons/master/Library/0PluginLibrary.plugin.js
+
+## BetterDiscord Plugin: BetterRoleColors
+curl -L -o ~/.var/app/com.discordapp.Discord/config/BetterDiscord/plugins/BetterRoleColors.plugin.js https://raw.githubusercontent.com/zerebos/BetterDiscordAddons/master/Plugins/BetterRoleColors/BetterRoleColors.plugin.js
+
+# =============================
+# AUTRES INSTALLATIONS
+# =============================
+
+## Pokemon Colorscripts
+# Location: /usr/local/bin/pokemon-colorscripts
+# Installation: Méthode d'installation à documenter
+
+## Elegant GRUB2 Themes
+# Location: ~/Elegant-grub2-themes/
+# Installation: ./install.sh (dans le dossier)
