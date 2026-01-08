@@ -9,6 +9,12 @@ plugins=(
     dnf
     zsh-autosuggestions
     zsh-syntax-highlighting
+    sudo              # Appuie 2x sur ESC pour ajouter sudo
+    command-not-found # Suggère le package à installer
+    colored-man-pages # Pages man colorées
+    extract           # Extrait n'importe quelle archive avec "extract <file>"
+    z                 # Jump rapide vers des dossiers fréquents
+    fzf               # Intégration FZF améliorée
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -19,10 +25,10 @@ source $ZSH/oh-my-zsh.sh
 # Display Pokemon-colorscripts
 # Project page: https://gitlab.com/phoneybadger/pokemon-colorscripts#on-other-distros-and-macos
 #pokemon-colorscripts --no-title -s -r #without fastfetch
-pokemon-colorscripts --no-title -s -r | fastfetch -c $HOME/.config/fastfetch/config-pokemon.jsonc --logo-type file-raw --logo-height 10 --logo-width 5 --logo -
+#pokemon-colorscripts --no-title -s -r | fastfetch -c $HOME/.config/fastfetch/config-pokemon.jsonc --logo-type file-raw --logo-height 10 --logo-width 5 --logo -
 
 # fastfetch. Will be disabled if above colorscript was chosen to install
-#fastfetch -c $HOME/.config/fastfetch/config-compact.jsonc
+fastfetch -c $HOME/.config/fastfetch/config-compact.jsonc
 
 # Set-up FZF key bindings (CTRL R for fuzzy history finder)
 source <(fzf --zsh)
