@@ -1,0 +1,112 @@
+" ============================================
+" PLUGINS avec vim-plug
+" ============================================
+call plug#begin('~/.local/share/nvim/plugged')
+
+" LSP Support
+Plug 'neovim/nvim-lspconfig'
+
+" Autocomplétion
+Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+
+" Snippets
+Plug 'L3MON4D3/LuaSnip'
+Plug 'saadparwaiz1/cmp_luasnip'
+
+" Rust tools (optionnel mais utile)
+Plug 'simrat39/rust-tools.nvim'
+
+" Syntax highlighting amélioré
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+
+call plug#end()
+
+" ============================================
+" CONFIGURATION LSP (Lua embarqué)
+" ============================================
+lua << EOF
+-- Configuration nvim-cmp (autocomplétion)
+local cmp = require('cmp')
+cmp.setup({
+  snippet = {
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
+  },
+  mapping = cmp.mapping.preset.insert({
+    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.abort(),
+    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+  }),
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp' },
+    { name = 'luasnip' },
+  }, {
+    { name = 'buffer' },
+  })
+})
+
+-- Configuration rust-analyzer
+local lspconfig = require('lspconfig')
+lspconfig.rust_analyzer.setup({
+  settings = {
+    ['rust-analyzer'] = {
+      checkOnSave = {
+        command = "clippy",
+      },
+      cargo = {
+        allFeatures = true,
+      },
+    },
+  },
+})
+
+-- Raccourcis LSP
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+  callback = function(ev)
+    local opts = { buffer = ev.buf }
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+    vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
+  end,
+})
+
+-- Configuration rust-tools (optionnel)
+require('rust-tools').setup({})
+EOF
+
+" Affiche les numéros de ligne sur la gauche
+set number
+
+" Affiche les numéros relatifs
+set relativenumber
+
+" Personnalisation de la barre d'état
+set statusline=%f\ %y\ %l/%L\ %c
+
+" Active la coloration syntaxique
+syntax enable
+
+" Détection automatique du type de fichier
+filetype on
+
+" Configuration spécifique pour Python
+autocmd FileType python setlocal shiftwidth=4 tabstop=4 expandtab
+" Optionnel : activer l'indentation automatique pour Python
+autocmd FileType python filetype plugin indent on
+
+" Configuration spécifique pour l'assembleur MIPS (.s)
+autocmd BufNewFile,BufRead *.s setfiletype asm
+autocmd FileType asm setlocal shiftwidth=4 tabstop=4 expandtab
+
+" Optionnel : activer l'indentation automatique pour l'assembleur
+autocmd FileType asm filetype plugin indent on
+
+
