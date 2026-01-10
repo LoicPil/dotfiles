@@ -1,4 +1,5 @@
-# Neovim Configuration Guide
+# Neovim Configuration guide
+
 
 A comprehensive guide for your custom Neovim setup with Rust development support, LSP, and modern plugins.
 
@@ -418,6 +419,3 @@ nvim +PlugInstall +qall
 7. **Format code**: `Space f`
 8. **Quit**: `:wq` or `Space w` then `Space q`
 
----
-
-**Happy coding! 🚀**
