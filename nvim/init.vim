@@ -22,7 +22,7 @@ Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'rust-lang/rust.vim'
 
 " === Interface and Theme ===
-Plug 'folke/tokyonight.nvim'
+Plug 'Abhra00/solarized-luv.nvim'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'nvim-tree/nvim-web-devicons'
 
@@ -72,7 +72,7 @@ silent !mkdir -p ~/.config/nvim/backup ~/.config/nvim/undo
 " THEME
 " ============================================
 try
-  colorscheme tokyonight-night
+  colorscheme solarized-luv
 catch
   colorscheme default
 endtry
@@ -208,25 +208,25 @@ vim.api.nvim_create_autocmd('FileType', {
 vim.api.nvim_create_autocmd('LspAttach', {
   callback = function(args)
     local opts = { buffer = args.buf, silent = true }
-    
+
     -- Navigation
     vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
     vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
     vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, opts)
-    
+
     -- Documentation
     vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
     vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
-    
+
     -- Actions
     vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
     vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
     vim.keymap.set('n', '<leader>f', function()
       vim.lsp.buf.format({ async = true })
     end, opts)
-    
+
     -- Diagnostics
     vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
     vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
@@ -260,7 +260,7 @@ local lualine = safe_require('lualine')
 if lualine then
   lualine.setup({
     options = {
-      theme = 'tokyonight',
+      theme = 'auto',
       icons_enabled = true,
       component_separators = { left = '', right = ''},
       section_separators = { left = '', right = ''},
@@ -272,6 +272,50 @@ if lualine then
       lualine_x = {'encoding', 'fileformat', 'filetype'},
       lualine_y = {'progress'},
       lualine_z = {'location'}
+    },
+  })
+end
+
+-- ================================================
+-- TELESCOPE: CONFIGURATION
+-- ================================================
+local telescope = safe_require('telescope')
+if telescope then
+  telescope.setup({
+    defaults = {
+      file_ignore_patterns = { "node_modules", ".git/" },
+      layout_config = {
+        horizontal = {
+          preview_width = 0.55,
+        },
+      },
+      -- Disable preview for problematic file types
+      file_previewer = require('telescope.previewers').vim_buffer_cat.new,
+      grep_previewer = require('telescope.previewers').vim_buffer_vimgrep.new,
+      qflist_previewer = require('telescope.previewers').vim_buffer_qflist.new,
+      -- Buffer previewer configuration
+      buffer_previewer_maker = function(filepath, bufnr, opts)
+        local previewers = require('telescope.previewers')
+        local Job = require('plenary.job')
+
+        -- Skip preview for large files or binary files
+        local stat = vim.loop.fs_stat(filepath)
+        if stat and stat.size > 100000 then
+          vim.schedule(function()
+            vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {'File too large to preview'})
+          end)
+          return
+        end
+
+        -- Use default previewer
+        previewers.buffer_previewer_maker(filepath, bufnr, opts)
+      end,
+    },
+    pickers = {
+      find_files = {
+        hidden = true,
+        follow = true,
+      },
     },
   })
 end
@@ -376,14 +420,27 @@ let mapleader = " "
 " Quick save
 nnoremap <leader>w :w<CR>
 
-" Quit
+" Quit (asks to save if modified)
 nnoremap <leader>q :q<CR>
 
+" Quit without saving (force quit)
+nnoremap <leader>qq :q!<CR>
+
+" Quit all without saving
+nnoremap <leader>qa :qa!<CR>
+
+" Save and quit
+nnoremap <leader>x :wq<CR>
+
 " Telescope (file search)
-nnoremap <leader>ff <cmd>Telescope find_files<cr>
+nnoremap <leader>ff <cmd>Telescope find_files cwd=~<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
 nnoremap <leader>fh <cmd>Telescope help_tags<cr>
+
+" Telescope - search in specific directories
+nnoremap <leader>fc <cmd>Telescope find_files cwd=.<cr>
+nnoremap <leader>fd <cmd>Telescope find_files cwd=~/Documents<cr>
 
 " Navigate between buffers
 nnoremap <Tab> :bnext<CR>
