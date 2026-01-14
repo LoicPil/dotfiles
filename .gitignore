@@ -37,3 +37,4 @@ rofi/.current_wallpaper
 
 # Hypr initial startup flag
 hypr/.initial_startup_done
+nvim.bak/
