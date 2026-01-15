@@ -27,9 +27,11 @@ My personal configuration files for Fedora Workstation with Hyprland, including 
 **Do NOT manually install Hyprland first!** JaKooLit's script handles everything.
 
 #### Step 1: Install Fedora Workstation
+
 Start with a fresh Fedora Workstation installation.
 
 #### Step 2: Install JaKooLit's Hyprland
+
 This handles all system setup (Hyprland, SDDM, audio pipelines, systemd services, etc.):
 
 ```bash
@@ -148,6 +150,7 @@ cd ~/dotfiles
 ```
 
 This updates both:
+
 - `packages.txt` - All user-installed DNF packages
 - `flatpaks-clean.txt` - All installed Flatpak applications
 
@@ -210,11 +213,13 @@ git push
 #### What Gets Updated
 
 The script compares and updates these directories:
+
 - `hypr/` (excludes UserConfigs/ and UserScripts/)
 - `waybar/` (excludes your config and style.css)
 - `rofi/`, `kitty/`, `swaync/`, `wlogout/`, `wallust/`, etc.
 
 **Your personal files are NEVER touched:**
+
 - ✅ `hypr/UserConfigs/` - Safe
 - ✅ `hypr/UserScripts/` - Safe
 - ✅ `waybar/config` and `waybar/style.css` - Safe
@@ -271,6 +276,7 @@ The install script creates symlinks from your home directory to the dotfiles rep
 ```
 
 **Benefits:**
+
 - ✅ Edit files in `~/dotfiles/` and changes apply immediately
 - ✅ All configs are version controlled
 - ✅ Easy to sync across multiple machines
@@ -438,6 +444,7 @@ cargo --version
 ```
 
 **What gets installed:**
+
 - `~/.cargo/` - Cargo home directory (packages and binaries)
 - `~/.rustup/` - Rustup home directory (Rust toolchains)
 
@@ -689,6 +696,7 @@ git push
 ### Update Issues
 
 **"No update available" message**
+
 ```bash
 # You're already on the latest version
 # Check manually:
@@ -696,17 +704,20 @@ ls ~/Hyprland-Dots/config/hypr/v*
 ```
 
 **Want to skip specific updates**
+
 - The upgrade script asks confirmation for each directory
 - Simply answer "N" for directories you don't want to update
 
 ### Restore from Backup
 
 **List available backups:**
+
 ```bash
 ls ~/dotfiles/backup/
 ```
 
 **Restore specific config:**
+
 ```bash
 # Restore from backup
 cp -r ~/dotfiles/backup/TIMESTAMP/hypr ~/dotfiles/
@@ -760,6 +771,7 @@ cat ~/dotfiles/Upgrade-Logs/upgrade-*.log
 ### Development Tools Issues
 
 **Rust not found after restart**
+
 ```bash
 # Make sure Rust is in PATH
 source ~/.cargo/env
@@ -769,6 +781,7 @@ exec zsh
 ```
 
 **UV not found**
+
 ```bash
 # Reinstall UV
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -779,18 +792,21 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ## 📚 Additional Resources
 
 ### Dotfiles & Hyprland
+
 - **[Complete Recovery Guide](consign/README.md)** - Detailed instructions for fresh installations and data recovery
 - [JaKooLit's Fedora-Hyprland](https://github.com/JaKooLit/Fedora-Hyprland) - System installation
 - [JaKooLit's Hyprland-Dots](https://github.com/JaKooLit/Hyprland-Dots) - Upstream configurations
 - [Hyprland Wiki](https://wiki.hyprland.org/) - Official documentation
 
 ### Development Tools
+
 - [UV Documentation](https://github.com/astral-sh/uv) - Python package manager
 - [The Rust Book](https://doc.rust-lang.org/book/) - Learn Rust
 - [Rust by Example](https://doc.rust-lang.org/rust-by-example/) - Practical examples
 - [crates.io](https://crates.io/) - Rust packages
 
 ### Shell & Config
+
 - [Oh My Zsh](https://ohmyz.sh/) - Zsh framework
 
 ---
@@ -800,10 +816,12 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 **Primary Backup Location:** `smb://raspberrypinas.local/backuploic/backup-laptop-piletteloic`
 
 **Local Backups:**
+
 - Configuration backups: `~/dotfiles/backup/TIMESTAMP/`
 - Update logs: `~/dotfiles/Upgrade-Logs/`
 
 **Development Tools:**
+
 - Rust: `~/.cargo/` and `~/.rustup/` (not backed up)
 - UV: `~/.local/share/uv/` (not backed up)
 
@@ -812,6 +830,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ## 🎯 Quick Reference
 
 ### First-Time Setup
+
 ```bash
 # 1. Install JaKooLit's Hyprland
 git clone --depth=1 https://github.com/JaKooLit/Fedora-Hyprland.git
@@ -827,6 +846,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ### Daily Usage
+
 ```bash
 # Update from Waybar button → Click update button
 # OR manually:
@@ -838,6 +858,7 @@ cd ~/dotfiles && git status && git add . && git commit -m "Update" && git push
 ```
 
 ### Development
+
 ```bash
 # Python project
 cd ~/projects && uv init my-project && cd my-project
@@ -849,6 +870,7 @@ cargo run
 ```
 
 ### Maintenance
+
 ```bash
 # Update package lists
 cd ~/dotfiles && ./update-packages.sh
