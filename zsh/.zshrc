@@ -50,7 +50,7 @@ alias lla='ls -la'
 alias lt='ls --tree'
 
 # Personal alias
-alias cours='cd ~/Documents/Bac3Math/cours'
+alias cours='cd ~/Documents/University/Year3/Courses'
 
 # Git alias
 alias gitst='git status'
