@@ -23,6 +23,17 @@ curl -L -o ~/.var/app/com.discordapp.Discord/config/BetterDiscord/plugins/0Plugi
 curl -L -o ~/.var/app/com.discordapp.Discord/config/BetterDiscord/plugins/BetterRoleColors.plugin.js https://raw.githubusercontent.com/zerebos/BetterDiscordAddons/master/Plugins/BetterRoleColors/BetterRoleColors.plugin.js
 
 # =============================
+# GITGUARDIAN -GGSHIELD
+# ============================
+
+#Install pipx 
+sudo dnf install pipx 
+pipx ensurepath
+pipx install ggshield
+# Authentifier avec GitGuardian
+ggshield auth login
+
+# =============================
 # AUTRES INSTALLATIONS
 # =============================
 
@@ -33,3 +44,5 @@ curl -L -o ~/.var/app/com.discordapp.Discord/config/BetterDiscord/plugins/Better
 ## Elegant GRUB2 Themes
 # Location: ~/Elegant-grub2-themes/
 # Installation: ./install.sh (dans le dossier)
+
+
