@@ -1,40 +1,95 @@
+# ===================================
 # Backup directories
+# ===================================
 backup/
 zsh-backup/
+nvim.bak/
+Upgrade-Logs/
 
+# ===================================
+# SSH Security
+# ===================================
 # SSH private keys
 ssh/id_*
 ssh/*_rsa
 ssh/*_ed25519
+ssh/known_hosts
 
 # Allow SSH public keys
 !ssh/*.pub
 
+# ===================================
 # Temporary and backup files
+# ===================================
 *.swp
 *.swo
+*.swn
 *~
 *.bak
 *.old
+*.tmp
 
+# ===================================
 # Log files
+# ===================================
 *.log
 
-# System files (macOS, Windows)
+# ===================================
+# System files
+# ===================================
+# macOS
 .DS_Store
-Thumbs.db
+.AppleDouble
+.LSOverride
 
-# Emacs generated files
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Linux
+.directory
+
+# ===================================
+# Editor files
+# ===================================
+# Emacs
 emacs/auto-save-list/
 emacs/eln-cache/
+emacs/.cache/
+emacs/transient/
 
-# Oh-my-zsh cache and logs
+# Vim/Neovim
+.netrwhist
+
+# ===================================
+# Shell
+# ===================================
+# Oh-my-zsh
 oh-my-zsh/log/
 oh-my-zsh/cache/
+oh-my-zsh/.zcompdump*
 
-# Rofi current wallpaper symlink
+# Zsh
+.zsh_history
+.zsh_sessions/
+.zcompdump*
+
+# ===================================
+# Hyprland / Window Manager
+# ===================================
+# Rofi
 rofi/.current_wallpaper
 
-# Hypr initial startup flag
+# Hypr
 hypr/.initial_startup_done
-nvim.bak/
+hypr/hypridle.log
+
+# ===================================
+# Secrets (au cas où)
+# ===================================
+.env
+.env.local
+*.key
+*.pem
+*_private*
+secrets/
