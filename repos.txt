@@ -1,0 +1,69 @@
+# DNF Repositories Configuration
+# Generated automatically by update-repos.sh
+# 
+# This file contains commands to restore ALL repositories
+# detected on your system at the time of generation.
+#
+# USAGE:
+#   On a fresh system: cd ~/dotfiles && ./setup-repos.sh
+#   Or copy-paste the commands below manually
+#
+# Generated on: Mon 19 Jan 17:19:27 CET 2026
+# Hostname: piletteloic-laptop
+# Fedora version: 43
+
+# ============================================
+# RPM Fusion (Free & Nonfree)
+# ============================================
+sudo dnf install -y \
+  https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+  https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+
+sudo dnf config-manager --set-enabled rpmfusion-nonfree-nvidia-driver
+sudo dnf config-manager --set-enabled rpmfusion-nonfree-steam
+
+# ============================================
+# COPR Repositories
+# ============================================
+sudo dnf copr enable errornointernet/packages -y
+sudo dnf copr enable phracek/PyCharm -y
+sudo dnf copr enable tofik/nwg-shell -y
+sudo dnf copr enable sdegler/hyprland -y
+sudo dnf copr enable msmafra/hyprland -y
+sudo dnf copr enable solopasha/hyprland -y
+sudo dnf copr enable erikreider/SwayNotificationCenter -y
+
+# ============================================
+# Third-Party Repositories
+# ============================================
+
+## Belgian eID
+sudo sh -c 'echo -e "[eid.belgium.be]\nname=Belgian eID package archive\nbaseurl=https://eid.belgium.be/sites/default/files/software/$basearch\nenabled=1\ngpgcheck=1\ngpgkey=https://eid.belgium.be/sites/default/files/software/eid.belgium.be.asc" > /etc/yum.repos.d/eid.belgium.be.repo'
+
+## Visual Studio Code
+sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+sudo sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+
+## Google Chrome
+sudo dnf install -y fedora-workstation-repositories
+sudo dnf config-manager --set-enabled google-chrome
+
+## Opera Browser
+sudo rpm --import https://rpm.opera.com/rpmrepo.key
+sudo sh -c 'echo -e "[opera]\nname=Opera packages\nbaseurl=https://rpm.opera.com/rpm\nenabled=1\ngpgcheck=1\ngpgkey=https://rpm.opera.com/rpmrepo.key" > /etc/yum.repos.d/opera.repo'
+
+
+# ===================================================
+# RESTORE INSTRUCTIONS
+# ===================================================
+# 
+# Quick restore (recommended):
+#   cd ~/dotfiles && ./setup-repos.sh
+#
+# Manual restore:
+#   Copy and paste the commands above
+#
+# Backed up .repo files:
+#   Check ~/dotfiles/repo-configs/ for manual repos
+#
+# ===================================================
