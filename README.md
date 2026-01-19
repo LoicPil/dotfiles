@@ -8,6 +8,7 @@ My personal configuration files for Fedora Workstation with Hyprland, including 
 
 - [Setting Up a New PC](#-setting-up-a-new-pc)
 - [Quick Start](#-quick-start-existing-installation)
+- [Repository Management](#-repository-management)
 - [Package Management](#-package-management)
 - [Updating Configurations](#-updating-configurations)
 - [How It Works](#-how-it-works)
@@ -43,22 +44,52 @@ cd Fedora-Hyprland
 sudo reboot
 ```
 
-#### Step 3: Clone and Install Your Dotfiles
+#### Step 3: Clone Your Dotfiles
 
 ```bash
 # Clone your personal dotfiles
 git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+```
 
-# Install your packages
+#### Step 4: Setup Repositories (CRITICAL!)
+
+**⚠️ IMPORTANT:** You MUST setup repositories BEFORE installing packages!
+
+```bash
+# Setup all required repositories
+./setup-repos.sh
+```
+
+This installs:
+
+- RPM Fusion (Free & Nonfree)
+- Visual Studio Code
+- Google Chrome
+- Opera Browser
+- Belgian eID
+- All COPR repos (Hyprland, PyCharm, SwayNotificationCenter, etc.)
+
+See [consign/REPOS-SETUP.md](consign/REPOS-SETUP.md) for detailed repository information.
+
+#### Step 5: Install Packages
+
+```bash
+# Install DNF packages
 sudo dnf install $(cat packages.txt)
-cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
 
+# Install Flatpaks
+cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
+```
+
+#### Step 6: Apply Your Dotfiles
+
+```bash
 # Apply your configs (automatically creates backups and symlinks)
 ./install.sh
 ```
 
-#### Step 4: Install Development Tools (Optional)
+#### Step 7: Install Development Tools (Optional)
 
 ```bash
 # Install Rust
@@ -78,6 +109,9 @@ Your personalized Hyprland setup is now ready! 🎉
 ```bash
 git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+
+# Setup repositories FIRST
+./setup-repos.sh
 
 # Install all packages
 sudo dnf install $(cat packages.txt)
@@ -119,6 +153,9 @@ This comprehensive guide includes everything you need to completely restore your
 git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
+# Setup repositories (REQUIRED FIRST!)
+./setup-repos.sh
+
 # Install dotfiles (automatically initializes submodules and creates symlinks)
 ./install.sh
 
@@ -134,6 +171,58 @@ To remove all dotfiles symlinks:
 ```bash
 cd ~/dotfiles
 ./uninstall.sh
+```
+
+---
+
+## 📦 Repository Management
+
+### Setup Repositories on Fresh System
+
+**⚠️ CRITICAL:** Always setup repositories BEFORE installing packages!
+
+Without the proper repositories, many packages in `packages.txt` will fail to install because DNF won't know where to find them.
+
+```bash
+cd ~/dotfiles
+./setup-repos.sh
+```
+
+This configures:
+
+- **RPM Fusion** (Free & Nonfree) - Additional software packages
+- **Visual Studio Code** - Microsoft's code editor
+- **Google Chrome** - Google's web browser
+- **Opera** - Opera web browser
+- **Belgian eID** - Belgian electronic ID card support
+- **COPR Repositories:**
+  - `solopasha/hyprland` - Hyprland compositor
+  - `msmafra/hyprland` - Additional Hyprland packages
+  - `sdegler/hyprland` - Hyprland development packages
+  - `tofik/nwg-shell` - Wayland shell components
+  - `erikreider/SwayNotificationCenter` - Notification daemon
+  - `phracek/PyCharm` - Python IDE
+  - `errornointernet/packages` - Additional utilities
+
+**For detailed repository information, see:** [consign/REPOS-SETUP.md](consign/REPOS-SETUP.md)
+
+### Update Repository List
+
+Keep your repository list synchronized with your current system:
+
+```bash
+cd ~/dotfiles
+./update-repos.sh
+```
+
+This creates/updates `repos.txt` with your current repository configuration.
+
+Then commit the changes:
+
+```bash
+git add repos.txt
+git commit -m "Update repository list"
+git push
 ```
 
 ---
@@ -157,11 +246,13 @@ This updates both:
 ### Restore Packages on a Fresh System
 
 ```bash
-# Install DNF packages
-sudo dnf install $(cat ~/dotfiles/packages.txt)
+# FIRST: Setup repositories
+cd ~/dotfiles
+./setup-repos.sh
 
-# Install Flatpaks
-cat ~/dotfiles/flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
+# THEN: Install packages
+sudo dnf install $(cat packages.txt)
+cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
 ```
 
 **Note:** Some package names may differ between Fedora versions. Use `dnf search <package>` to find replacements.
@@ -288,6 +379,8 @@ The install script creates symlinks from your home directory to the dotfiles rep
 |--------|---------|
 | `install.sh` | Creates symlinks, initializes submodules, sets up dotfiles |
 | `uninstall.sh` | Removes all symlinks |
+| `setup-repos.sh` | **NEW** - Configures all required DNF repositories |
+| `update-repos.sh` | **NEW** - Saves current repository configuration |
 | `update-packages.sh` | Updates package lists with currently installed packages |
 | `sync-configs.sh` | Syncs configs after external installers break symlinks |
 | `hypr/scripts/KooLsDotsUpdate.sh` | Checks for updates from Waybar button |
@@ -301,6 +394,8 @@ dotfiles/
 ├── Upgrade-Logs/        # Update logs (gitignored)
 ├── btop/                # System monitor configuration
 ├── consign/             # Complete recovery & installation guide
+│   ├── README.md        # Detailed recovery instructions
+│   └── REPOS-SETUP.md   # Repository setup documentation
 ├── emacs/               # Emacs configuration
 ├── git/                 # Git configuration
 ├── hypr/                # Hyprland window manager
@@ -320,8 +415,11 @@ dotfiles/
 ├── zsh/                 # Zsh configuration
 ├── flatpaks-clean.txt   # Flatpak applications list
 ├── packages.txt         # DNF packages list
+├── repos.txt            # Repository configuration (NEW)
 ├── install.sh           # Installation script
 ├── uninstall.sh         # Uninstallation script
+├── setup-repos.sh       # Repository setup script (NEW)
+├── update-repos.sh      # Repository list updater (NEW)
 ├── update-packages.sh   # Package list updater
 └── sync-configs.sh      # Sync script for external updates
 ```
@@ -675,15 +773,27 @@ git commit -m "Update package lists"
 git push
 ```
 
+### Updating Repository Lists
+
+```bash
+cd ~/dotfiles
+./update-repos.sh
+git add repos.txt
+git commit -m "Update repository list"
+git push
+```
+
 ---
 
 ## ⚠️ Important Notes
 
+- **Repositories First**: Always run `./setup-repos.sh` BEFORE installing packages
 - **SSH Keys**: Private keys are NOT tracked in git (see `.gitignore`)
 - **Backups**: Created automatically in `~/dotfiles/backup/TIMESTAMP/` during updates
 - **Update Logs**: Saved in `~/dotfiles/Upgrade-Logs/`
 - **Oh-my-zsh**: Managed as a git submodule (automatically initialized by `install.sh`)
 - **Package Lists**: Auto-generated by `update-packages.sh` - don't edit manually
+- **Repository List**: Auto-generated by `update-repos.sh` - don't edit manually
 - **Protected Configs**: UserConfigs/, UserScripts/, and personal waybar styles are never overwritten
 - **JaKooLit First**: Always install JaKooLit's Hyprland setup before applying your dotfiles on a new system
 - **Version Tracking**: File `hypr/v2.X.X` tracks your current Hyprland dots version
@@ -692,6 +802,32 @@ git push
 ---
 
 ## 🆘 Troubleshooting
+
+### Repository Issues
+
+**"Package not found" errors during installation**
+
+```bash
+# You probably forgot to setup repositories first!
+cd ~/dotfiles
+./setup-repos.sh
+
+# Then retry package installation
+sudo dnf install $(cat packages.txt)
+```
+
+**Check which repositories are enabled**
+
+```bash
+dnf repolist
+```
+
+**Re-setup all repositories**
+
+```bash
+cd ~/dotfiles
+./setup-repos.sh
+```
 
 ### Update Issues
 
@@ -794,6 +930,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ### Dotfiles & Hyprland
 
 - **[Complete Recovery Guide](consign/README.md)** - Detailed instructions for fresh installations and data recovery
+- **[Repository Setup Guide](consign/REPOS-SETUP.md)** - Detailed repository configuration instructions
 - [JaKooLit's Fedora-Hyprland](https://github.com/JaKooLit/Fedora-Hyprland) - System installation
 - [JaKooLit's Hyprland-Dots](https://github.com/JaKooLit/Hyprland-Dots) - Upstream configurations
 - [Hyprland Wiki](https://wiki.hyprland.org/) - Official documentation
@@ -829,18 +966,28 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ## 🎯 Quick Reference
 
-### First-Time Setup
+### First-Time Setup (Correct Order!)
 
 ```bash
 # 1. Install JaKooLit's Hyprland
 git clone --depth=1 https://github.com/JaKooLit/Fedora-Hyprland.git
 cd Fedora-Hyprland && ./install.sh && sudo reboot
 
-# 2. Install your dotfiles
+# 2. Clone your dotfiles
 git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
-cd ~/dotfiles && ./install.sh
+cd ~/dotfiles
 
-# 3. Install development tools (optional)
+# 3. Setup repositories FIRST (CRITICAL!)
+./setup-repos.sh
+
+# 4. Install packages
+sudo dnf install $(cat packages.txt)
+cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
+
+# 5. Apply dotfiles
+./install.sh
+
+# 6. Install development tools (optional)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
@@ -875,6 +1022,9 @@ cargo run
 # Update package lists
 cd ~/dotfiles && ./update-packages.sh
 
+# Update repository list
+cd ~/dotfiles && ./update-repos.sh
+
 # Reinstall dotfiles
 cd ~/dotfiles && ./uninstall.sh && ./install.sh
 
@@ -883,6 +1033,9 @@ cp -r ~/dotfiles/backup/TIMESTAMP/config ~/dotfiles/
 
 # Update development tools
 rustup update  # Update Rust
+
+# Re-setup repositories
+./setup-repos.sh
 ```
 
 ---
