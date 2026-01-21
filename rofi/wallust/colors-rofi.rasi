@@ -17,11 +17,11 @@ alternate-urgent-background: #131416;
 alternate-urgent-foreground: #EBE2E3;
 
 selected-active-background: #685055;
-selected-active-foreground: #EBE2E3;
+selected-active-foreground: #131416;
 selected-normal-background: #685055;
-selected-normal-foreground: #EBE2E3;
+selected-normal-foreground: #131416;
 selected-urgent-background: #685055;
-selected-urgent-foreground: #EBE2E3;
+selected-urgent-foreground: #131416;
 
 background-color: #131416;
 background: rgba(0,0,0,0.7);

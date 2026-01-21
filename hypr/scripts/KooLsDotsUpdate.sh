@@ -1,18 +1,16 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
 # simple bash script to check if update is available by comparing local version and github version
-# MODIFIED: Uses upgrade-custom.sh from UserScripts for dotfiles-friendly workflow
 
 # Local Paths
 local_dir="$HOME/.config/hypr"
 iDIR="$HOME/.config/swaync/images/"
-local_version=$(ls $local_dir/v* 2>/dev/null | sort -V | tail -n 1 | sed 's/.*v\(.*\)/\1/')
+local_version=$(find "$local_dir" -maxdepth 1 -name 'v*' -printf '%f\n' 2>/dev/null | sort -V | tail -n 1 | sed 's/^v//')
 KooL_Dots_DIR="$HOME/Hyprland-Dots"
-UPGRADE_SCRIPT="$HOME/.config/hypr/UserScripts/upgrade-custom.sh"
 
 # exit if cannot find local version
 if [ -z "$local_version" ]; then
-  notify-send -i "$iDIR/error.png" "ERROR "!?!?!!"" "Unable to find KooL's dots version . exiting.... "
+  notify-send -i "$iDIR/error.png" 'ERROR !?!?!!' "Unable to find KooL's dots version. Exiting."
   exit 1
 fi
 
@@ -21,7 +19,7 @@ branch="main"
 github_url="https://github.com/JaKooLit/Hyprland-Dots/tree/$branch/config/hypr/"
 
 # Fetch the version from GitHub URL - KooL's dots
-github_version=$(curl -s $github_url | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' | sort -V | tail -n 1 | sed 's/v//')
+github_version=$(curl -s "$github_url" | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' | sort -V | tail -n 1 | sed 's/v//')
 
 # Cant find  GitHub URL - KooL's dots version
 if [ -z "$github_version" ]; then
@@ -36,20 +34,22 @@ else
   # update available
   notify_cmd_base="notify-send -t 10000 -A action1=Update -A action2=NO -h string:x-canonical-private-synchronous:shot-notify"
   notify_cmd_shot="${notify_cmd_base} -i $iDIR/ja.png"
+
   response=$($notify_cmd_shot "KooL Hyprland:" "Update available! Update now?")
+
   case "$response" in
     "action1")  
-      if [ -d $KooL_Dots_DIR ]; then
+      if [ -d "$KooL_Dots_DIR" ]; then
       	if ! command -v kitty &> /dev/null; then
   			notify-send -i "$iDIR/error.png" "E-R-R-O-R" "Kitty terminal not found. Please install Kitty terminal."
   			exit 1
 		fi
         kitty -e bash -c "
-          cd $KooL_Dots_DIR &&
+          cd \"$KooL_Dots_DIR\" &&
           git stash &&
           git pull &&
-          $UPGRADE_SCRIPT &&
-		  notify-send -u critical -i '$iDIR/ja.png' 'Update Completed' 'Changes saved in ~/dotfiles/backup/. Review with: cd ~/dotfiles && git status'
+          ./copy.sh &&
+		  notify-send -u critical -i "$iDIR/ja.png" 'Update Completed:' 'Kindly log out and relogin to take effect'
         "
 	
       else
@@ -59,10 +59,10 @@ else
 		fi
         kitty -e bash -c "
           git clone --depth=1 https://github.com/JaKooLit/Hyprland-Dots.git $KooL_Dots_DIR &&
-          cd $KooL_Dots_DIR &&
-          chmod +x $UPGRADE_SCRIPT &&
-          $UPGRADE_SCRIPT &&
-		  notify-send -u critical -i '$iDIR/ja.png' 'Update Completed' 'Changes saved in ~/dotfiles/backup/. Review with: cd ~/dotfiles && git status'
+          cd \"$KooL_Dots_DIR\" &&
+          chmod +x copy.sh &&
+          ./copy.sh &&
+		  notify-send -u critical -i "$iDIR/ja.png" 'Update Completed:' 'Kindly log out and relogin to take effect'
         "
       fi
       ;;
