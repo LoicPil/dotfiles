@@ -14,7 +14,9 @@
 # This is for changing kb_layouts. Set kb_layouts in
 
 MAP_FILE="$HOME/.cache/kb_layout_per_window"
-CFG_FILE="$HOME/.config/hypr/configs/SystemSettings.conf"
+# APRÈS - Check UserSettings.conf d'abord, puis SystemSettings.conf
+USER_CFG="$HOME/.config/hypr/UserConfigs/UserSettings.conf"
+SYS_CFG="$HOME/.config/hypr/configs/SystemSettings.conf"
 ICON="$HOME/.config/swaync/images/ja.png"
 SCRIPT_NAME="$(basename "$0")"
 LISTENER_PIDFILE="$HOME/.cache/kb_layout_per_window.listener.pid"
@@ -22,11 +24,16 @@ LISTENER_PIDFILE="$HOME/.cache/kb_layout_per_window.listener.pid"
 # Ensure map file exists
 touch "$MAP_FILE"
 
-# Read layouts from config
-if ! grep -q 'kb_layout' "$CFG_FILE"; then
-  echo "Error: cannot find kb_layout in $CFG_FILE" >&2
+# Read layouts from config (try UserSettings first, fallback to SystemSettings)
+if [[ -f "$USER_CFG" ]] && grep -q 'kb_layout' "$USER_CFG"; then
+  CFG_FILE="$USER_CFG"
+elif grep -q 'kb_layout' "$SYS_CFG"; then
+  CFG_FILE="$SYS_CFG"
+else
+  echo "Error: cannot find kb_layout in config files" >&2
   exit 1
 fi
+
 kb_layouts=($(grep 'kb_layout' "$CFG_FILE" | cut -d '=' -f2 | tr -d '[:space:]' | tr ',' ' '))
 count=${#kb_layouts[@]}
 
