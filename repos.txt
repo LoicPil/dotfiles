@@ -8,7 +8,7 @@
 #   On a fresh system: cd ~/dotfiles && ./setup-repos.sh
 #   Or copy-paste the commands below manually
 #
-# Generated on: Mon 19 Jan 17:19:27 CET 2026
+# Generated on: Tue 10 Feb 13:34:23 CET 2026
 # Hostname: piletteloic-laptop
 # Fedora version: 43
 
