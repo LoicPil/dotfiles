@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
+# /* ---- 💫 https://github.com/LinuxBeginnings 💫 ---- */  ##
 # This is for changing kb_layouts. Set kb_layouts in "$HOME/.config/hypr/UserConfigs/UserSettings.conf"
 
 notif_icon="$HOME/.config/swaync/images/ja.png"
@@ -11,10 +11,6 @@ ignore_patterns=(
   "Bluetooth Speaker"
   "Other Device 
   Name"
-  "power-button" # ← AJOUTE CES LIGNES
-  "video-bus"    # ←
-  "sleep-button" # ←
-  "thinkpad-extra-buttons"
 )
 
 # Function to get keyboard names
@@ -54,7 +50,7 @@ get_current_layout_info() {
         jq -r --arg name "$name" '.keyboards[] | select(.name==$name).active_layout_index')
       break
     fi
-  done <<<"$(get_keyboard_names)"
+  done <<< "$(get_keyboard_names)"
 
   $found_kb && return 0
   return 1
@@ -82,6 +78,7 @@ change_layout() {
   return 0
 }
 
+
 # Stores values in layout_mapping, variant_mapping and layout_index
 if ! get_current_layout_info; then
   echo "Could not get current layout information." >&2
@@ -103,7 +100,7 @@ elif [[ "$1" == "switch" ]]; then
   layout_count=${#layout_mapping[@]}
   echo "Number of layouts: $layout_count"
 
-  next_index=$(((layout_index + 1) % layout_count))
+  next_index=$(( (layout_index + 1) % layout_count ))
   new_layout="${layout_mapping[$next_index]}"
   new_variant="${variant_mapping[$next_index]}"
   echo "Next layout: $new_layout"

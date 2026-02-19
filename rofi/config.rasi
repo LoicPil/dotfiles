@@ -1,4 +1,4 @@
-/* ---- 💫 https://github.com/JaKooLit 💫 ---- */
+/* ---- 💫 https://github.com/LinuxBeginnings 💫 ---- */
 /* Ja KooLit - Default 
 
 * All main themes or configs are located in ~/.config/rofi/themes/
@@ -21,7 +21,3 @@
 
 
 @theme "~/.config/rofi/themes/KooL_style-4.rasi"
-@theme "~/.config/rofi/themes/KooL_style-4.rasi"
-@theme "~/.config/rofi/themes/KooL_style-5.rasi"
-@theme "~/.config/rofi/themes/KooL_style-6.rasi"
-@theme "~/.config/rofi/themes/KooL_style-6.rasi"
