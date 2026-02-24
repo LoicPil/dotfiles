@@ -99,6 +99,7 @@ menu() {
   done
 }
 
+
 modify_startup_config() {
   local selected_file="$1"
   local startup_config="$HOME/.config/hypr/UserConfigs/Startup_Apps.conf"
@@ -142,33 +143,7 @@ apply_image_wallpaper() {
   sleep 2
   "$SCRIPTSDIR/Refresh.sh"
   sleep 1
-  set_sddm_wallpaper
-}
 
-set_sddm_wallpaper() {
-  sleep 1
-  local sddm_themes_dir=""
-  if [ -d "/usr/share/sddm/themes" ]; then
-    sddm_themes_dir="/usr/share/sddm/themes"
-  elif [ -d "/run/current-system/sw/share/sddm/themes" ]; then
-    sddm_themes_dir="/run/current-system/sw/share/sddm/themes"
-  fi
-  [ -z "$sddm_themes_dir" ] && return 0
-  local sddm_simple="$sddm_themes_dir/simple_sddm_2"
-  if [ -d "$sddm_simple" ] && [ -w "$sddm_simple/Backgrounds" ]; then
-    if pidof yad >/dev/null; then
-      killall yad
-    fi
-    if yad --info --text="Set current wallpaper as SDDM background?\n\nNOTE: This only applies to SIMPLE SDDM v2 Theme" \
-      --text-align=left \
-      --title="SDDM Background" \
-      --timeout=5 \
-      --buttons-layout=center \
-      --button="Yes":0 \
-      --button="No":1; then
-      exec "$SCRIPTSDIR/sddm_wallpaper.sh" --normal
-    fi
-  fi
 }
 
 apply_video_wallpaper() {
@@ -228,4 +203,3 @@ if pidof rofi >/dev/null; then
 fi
 
 main
-

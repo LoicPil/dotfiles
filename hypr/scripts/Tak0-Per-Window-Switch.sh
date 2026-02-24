@@ -10,7 +10,7 @@
 #                 smooth and comfortable workflow.               #
 #                                                                #
 ##################################################################
-# This is for changing kb_layouts. Set kb_layouts in
+# This is for changing kb_layouts. Set kb_layouts in 
 
 MAP_FILE="$HOME/.cache/kb_layout_per_window"
 USER_CFG="$HOME/.config/hypr/UserConfigs/UserSettings.conf"
@@ -45,8 +45,8 @@ get_keyboards() {
 # Save window-specific layout
 save_map() {
   local W=$1 L=$2
-  grep -v "^${W}:" "$MAP_FILE" >"$MAP_FILE.tmp"
-  echo "${W}:${L}" >>"$MAP_FILE.tmp"
+  grep -v "^${W}:" "$MAP_FILE" > "$MAP_FILE.tmp"
+  echo "${W}:${L}" >> "$MAP_FILE.tmp"
   mv "$MAP_FILE.tmp" "$MAP_FILE"
 }
 
@@ -78,7 +78,7 @@ cmd_toggle() {
       break
     fi
   done
-  NEXT=$(((i + 1) % count))
+  NEXT=$(( (i+1) % count ))
   do_switch "$NEXT"
   save_map "$W" "${kb_layouts[NEXT]}"
   notify-send -u low -i "$ICON" "kb_layout: ${kb_layouts[NEXT]}"
@@ -117,9 +117,6 @@ fi
 
 # CLI
 case "$1" in
-toggle | "") cmd_toggle ;;
-*)
-  echo "Usage: $SCRIPT_NAME [toggle]" >&2
-  exit 1
-  ;;
+  toggle|"") cmd_toggle ;;
+  *) echo "Usage: $SCRIPT_NAME [toggle]" >&2; exit 1 ;;
 esac
