@@ -1,13 +1,14 @@
 return {
   {
-    "Abhra00/solarized-luv.nvim",
+    "folke/tokyonight.nvim",
     lazy = false,
     priority = 1000,
+    opts = { style = "storm" },
   },
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "solarized-luv",
+      colorscheme = "tokyonight-storm",
     },
   },
 }
