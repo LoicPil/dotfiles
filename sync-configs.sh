@@ -110,6 +110,8 @@ sync_config "swappy" && SYNCED=1
 
 # ~/* home dotfiles
 sync_home_dotfile ".zshrc" "zsh" && SYNCED=1
+sync_home_dotfile ".zshenv" "zsh" && SYNCED=1
+sync_home_dotfile ".zprofile" "zsh" && SYNCED=1
 
 if [ $SYNCED -eq 1 ]; then
   echo -e "\n${GREEN}✅ Sync complete!${NC}"
