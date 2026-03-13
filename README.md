@@ -2,6 +2,7 @@
 
 My personal configuration files for Fedora Workstation with Hyprland, including Zsh, Neovim, Kitty, Rofi, Waybar, and more.
 
+
 ---
 
 ## 📋 Table of Contents
