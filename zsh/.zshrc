@@ -11,7 +11,7 @@ export PATH="$HOME/.local/bin:$PATH"
 # Oh My Zsh Configuration
 # ===================================
 export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="agnosterzak"
+ZSH_THEME="avit"
 
 plugins=( 
     git
@@ -69,7 +69,7 @@ alias lt='ls --tree'
 # Personal alias
 alias cours='cd ~/Documents/University/Year3/Courses'
 alias dotfiles='cd ~/dotfiles'
-
+alias windowing='cd ~/Documents/University/Year3/Courses/structureDonnees_II/Windowing-Project'
 # ===================================
 # Aliases - Git
 # ===================================
