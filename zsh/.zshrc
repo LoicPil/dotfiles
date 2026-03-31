@@ -11,7 +11,7 @@ export PATH="$HOME/.local/bin:$PATH"
 # Oh My Zsh Configuration
 # ===================================
 export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="avit"
+ZSH_THEME="color-input"
 
 plugins=( 
     git

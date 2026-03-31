@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-## /* ---- 💫 https://github.com/LinuxBeginnings 💫 ---- */  ##
+# ==================================================
+#  KoolDots (2026)
+#  Project URL: https://github.com/LinuxBeginnings
+#  License: GNU GPLv3
+#  SPDX-License-Identifier: GPL-3.0-or-later
+# ==================================================
 # For Dark and Light switching
 # Note: Scripts are looking for keywords Light or Dark except for wallpapers as the are in a separate directories
 
@@ -12,6 +17,8 @@ hypr_config_path="$HOME/.config/hypr"
 swaync_style="$HOME/.config/swaync/style.css"
 ags_style="$HOME/.config/ags/user/style.css"
 SCRIPTSDIR="$HOME/.config/hypr/scripts"
+# shellcheck source=/dev/null
+. "$SCRIPTSDIR/WallpaperCmd.sh"
 notif="$HOME/.config/swaync/images/bell.png"
 wallust_rofi="$HOME/.config/wallust/templates/colors-rofi.rasi"
 
@@ -31,11 +38,11 @@ for pid in waybar rofi swaync ags swaybg; do
 done
 
 
-# Initialize swww if needed
-swww query || swww-daemon --format xrgb
+# Initialize wallpaper daemon if needed
+"$WWW_CMD" query || "$WWW_DAEMON" "${WWW_DAEMON_ARGS[@]}"
 
 # Set swww options
-swww="swww img"
+swww="$WWW_CMD img"
 effect="--transition-bezier .43,1.19,1,.4 --transition-fps 60 --transition-type grow --transition-pos 0.925,0.977 --transition-duration 2"
 
 # Determine current theme mode
