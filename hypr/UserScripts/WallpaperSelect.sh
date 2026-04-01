@@ -99,7 +99,6 @@ menu() {
   done
 }
 
-
 modify_startup_config() {
   local selected_file="$1"
   local startup_config="$HOME/.config/hypr/UserConfigs/Startup_Apps.conf"
@@ -118,7 +117,6 @@ modify_startup_config() {
   else
     # For image wallpapers:
     sed -i '/^\s*#\s*exec-once\s*=\s*swww-daemon\s*--format\s*xrgb\s*$/s/^\s*#\s*//;' "$startup_config"
-
     sed -i '/^\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^/\#/' "$startup_config"
 
     echo "Configured for static wallpaper (image)."
@@ -143,7 +141,6 @@ apply_image_wallpaper() {
   sleep 2
   "$SCRIPTSDIR/Refresh.sh"
   sleep 1
-
 }
 
 apply_video_wallpaper() {
@@ -189,7 +186,10 @@ main() {
   # Modify the Startup_Apps.conf file based on wallpaper type
   modify_startup_config "$selected_file"
 
-  # **CHECK FIRST** if it's a video or an image **before calling any function**
+  # Save current wallpaper
+  cp -f "$selected_file" "$wallpaper_current"
+
+  # Check if it's a video or an image before calling any function
   if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm|MP4|MKV|MOV|WEBM)$ ]]; then
     apply_video_wallpaper "$selected_file"
   else
@@ -203,3 +203,4 @@ if pidof rofi >/dev/null; then
 fi
 
 main
+
