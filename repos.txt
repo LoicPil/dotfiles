@@ -8,9 +8,9 @@
 #   On a fresh system: cd ~/dotfiles && ./setup-repos.sh
 #   Or copy-paste the commands below manually
 #
-# Generated on: Fri 27 Feb 11:00:33 CET 2026
+# Generated on: Fri 12 Jun 21:39:46 CEST 2026
 # Hostname: piletteloic-laptop
-# Fedora version: 43
+# Fedora version: 44
 
 # ============================================
 # RPM Fusion (Free & Nonfree)
@@ -30,12 +30,18 @@ sudo dnf copr enable phracek/PyCharm -y
 sudo dnf copr enable tofik/nwg-shell -y
 sudo dnf copr enable sdegler/hyprland -y
 sudo dnf copr enable msmafra/hyprland -y
+sudo dnf copr enable scottames/awww -y
 sudo dnf copr enable solopasha/hyprland -y
 sudo dnf copr enable erikreider/SwayNotificationCenter -y
 
 # ============================================
 # Third-Party Repositories
 # ============================================
+
+## adoptium-temurin-java-repository
+# Manual setup required!
+# Repository file backed up to: repo-configs/adoptium-temurin-java-repository.repo
+# To restore: sudo cp ~/dotfiles/repo-configs/adoptium-temurin-java-repository.repo /etc/yum.repos.d/
 
 ## Belgian eID
 sudo sh -c 'echo -e "[eid.belgium.be]\nname=Belgian eID package archive\nbaseurl=https://eid.belgium.be/sites/default/files/software/$basearch\nenabled=1\ngpgcheck=1\ngpgkey=https://eid.belgium.be/sites/default/files/software/eid.belgium.be.asc" > /etc/yum.repos.d/eid.belgium.be.repo'
