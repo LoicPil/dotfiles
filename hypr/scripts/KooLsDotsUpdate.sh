@@ -8,9 +8,9 @@
 # simple bash script to check if update is available by comparing local version and github version
 
 # Local Paths
-local_dir="$HOME/.config/hypr"
-iDIR="$HOME/.config/swaync/images/"
-local_version=$(find -L "$local_dir" -maxdepth 1 -name 'v*' -printf '%f\n' 2>/dev/null | sort -V | tail -n 1 | sed 's/^v//')
+local_dir="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+iDIR="${XDG_CONFIG_HOME:-$HOME/.config}/swaync/images/"
+local_version=$(find "$local_dir" -maxdepth 1 -name 'v*' -printf '%f\n' 2>/dev/null | sort -V | tail -n 1 | sed 's/^v//')
 KooL_Dots_DIR="$HOME/Hyprland-Dots"
 
 # exit if cannot find local version
@@ -23,7 +23,7 @@ fi
 branch="main"
 github_url="https://github.com/LinuxBeginnings/Hyprland-Dots/tree/$branch/config/hypr/"
 # Check for required tools (curl)
-if ! command -v curl &>/dev/null; then
+if ! command -v curl &> /dev/null; then
   notify-send -i "$iDIR/error.png" "Need curl:" "curl not found. Please install curl."
   exit 1
 fi
@@ -39,7 +39,7 @@ fi
 
 # Comparing local and github versions
 if [ "$(echo -e "$github_version\n$local_version" | sort -V | head -n 1)" = "$github_version" ]; then
-  notify-send -i "$iDIR/note.png" "KooL Hyprland:" "No update available"
+   notify-send -i "$iDIR/note.png" "KooL Hyprland:" "No update available"
   exit 0
 else
   # update available
@@ -49,36 +49,36 @@ else
   response=$($notify_cmd_shot "KooL Hyprland:" "Update available! Update now?")
 
   case "$response" in
-  "action1")
-    if [ -d "$KooL_Dots_DIR" ]; then
-      if ! command -v kitty &>/dev/null; then
-        notify-send -i "$iDIR/error.png" "E-R-R-O-R" "Kitty terminal not found. Please install Kitty terminal."
-        exit 1
-      fi
-      kitty -e bash -c "
+    "action1")  
+      if [ -d "$KooL_Dots_DIR" ]; then
+      	if ! command -v kitty &> /dev/null; then
+  			notify-send -i "$iDIR/error.png" "E-R-R-O-R" "Kitty terminal not found. Please install Kitty terminal."
+  			exit 1
+		fi
+        kitty -e bash -c "
           cd \"$KooL_Dots_DIR\" &&
           git stash &&
           git pull &&
           ./copy.sh &&
 		  notify-send -u critical -i "$iDIR/ja.png" 'Update Completed:' 'Kindly log out and relogin to take effect'
         "
-
-    else
-      if ! command -v kitty &>/dev/null; then
-        notify-send -i "$iDIR/error.png" "E-R-R-O-R" "Kitty terminal not found. Please install Kitty terminal."
-        exit 1
-      fi
-      kitty -e bash -c "
+	
+      else
+         if ! command -v kitty &> /dev/null; then
+  		  	notify-send -i "$iDIR/error.png" "E-R-R-O-R" "Kitty terminal not found. Please install Kitty terminal."
+  			exit 1
+		fi
+        kitty -e bash -c "
           git clone --depth=1 https://github.com/LinuxBeginnings/Hyprland-Dots.git $KooL_Dots_DIR &&
           cd \"$KooL_Dots_DIR\" &&
           chmod +x copy.sh &&
           ./copy.sh &&
 		  notify-send -u critical -i "$iDIR/ja.png" 'Update Completed:' 'Kindly log out and relogin to take effect'
         "
-    fi
-    ;;
-  "action2")
-    exit 0
-    ;;
+      fi
+      ;;
+    "action2")
+      exit 0
+      ;;
   esac
 fi
