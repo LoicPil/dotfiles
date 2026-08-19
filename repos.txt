@@ -8,7 +8,7 @@
 #   On a fresh system: cd ~/dotfiles && ./setup-repos.sh
 #   Or copy-paste the commands below manually
 #
-# Generated on: Thu 23 Jul 09:33:23 CEST 2026
+# Generated on: Wed 19 Aug 11:26:16 CEST 2026
 # Hostname: piletteloic-laptop
 # Fedora version: 44
 
@@ -30,6 +30,7 @@ sudo dnf copr enable phracek/PyCharm -y
 sudo dnf copr enable tofik/nwg-shell -y
 sudo dnf copr enable sdegler/hyprland -y
 sudo dnf copr enable msmafra/hyprland -y
+sudo dnf copr enable dejan/lazygit -y
 sudo dnf copr enable scottames/awww -y
 sudo dnf copr enable solopasha/hyprland -y
 sudo dnf copr enable erikreider/SwayNotificationCenter -y
