@@ -1,25 +1,18 @@
+-- ~/.config/nvim/lua/plugins/colorscheme.lua
 return {
+  { "LazyVim/LazyVim", opts = { colorscheme = "catppuccin-mocha" } },
   {
-    "folke/tokyonight.nvim",
-    lazy = false,
-    priority = 1000,
+    "catppuccin",
     opts = {
-      style = "storm", -- ou "night", "moon", "day"
-      on_highlights = function(hl, c)
-        hl.Function = { fg = c.green }
-        hl["@function"] = { fg = c.green }
-        hl["@function.call"] = { fg = c.green }
-        hl.Keyword = { fg = c.green1 }
-        hl["@keyword"] = { fg = c.green1 }
-        hl.String = { fg = c.green2 }
-        hl["@string"] = { fg = c.green2 }
+      custom_highlights = function(colors)
+        return {
+          LspInlayHint = {
+            fg = colors.overlay0, -- gris discret, fondu dans le fond
+            bg = "NONE", -- pas de pastille/bordure
+            style = { "italic" }, -- différencie du code réel sans attirer l'œil
+          },
+        }
       end,
-    },
-  },
-  {
-    "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "tokyonight",
     },
   },
 }
