@@ -5,7 +5,20 @@
 # PATH Configuration
 # ===================================
 # Local binaries (pipx, UV, custom scripts)
-export PATH="$HOME/.local/bin:$PATH"
+#export PATH="$HOME/.local/bin:$PATH"
+
+pathmunge()
+{
+    if ! echo $PATH | /bin/grep -qE "(^|:)$1($|:)" ; then
+        if [ "$2" = "after" ] ; then
+            PATH=$PATH:$1
+        else
+            PATH=$1:$PATH
+        fi
+    fi
+}
+pathmunge "$HOME/.local/bin"
+
 
 # ===================================
 # Oh My Zsh Configuration
@@ -70,6 +83,7 @@ alias lt='ls --tree'
 alias cours='cd ~/Documents/University/Year3/Courses'
 alias dotfiles='cd ~/dotfiles'
 alias windowing='cd ~/Documents/University/Year3/Courses/structureDonnees_II/Windowing-Project'
+alias bir='cd ~/Documents/University/Year3/Undergraduate_Research_Initiation_Grant/'
 # ===================================
 # Aliases - Git
 # ===================================
@@ -100,7 +114,8 @@ alias sqlite3='sqlite3 -cmd ".headers on" -cmd ".mode column"'
 # ===================================
 alias update='sudo dnf update && flatpak update'
 alias settings='gnome-control-center'
-
+alias pdf='evince'
+pdfo(){evince "$1" & disown;}
 # Dotfiles management
 alias dotupdate='cd ~/dotfiles && ./update-packages.sh'
 
