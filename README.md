@@ -2,6 +2,10 @@
 
 My personal configuration files for Fedora Workstation with Hyprland, including Zsh, Neovim, Kitty, Rofi, Waybar, and more.
 
+![Fedora](https://img.shields.io/badge/Fedora-51A2DA?style=for-the-badge&logo=fedora&logoColor=white)
+![Hyprland](https://img.shields.io/badge/Hyprland-58C4DC?style=for-the-badge&logo=hyprland&logoColor=white)
+![Neovim](https://img.shields.io/badge/Neovim-57A143?style=for-the-badge&logo=neovim&logoColor=white)
+![Zsh](https://img.shields.io/badge/Zsh-F15A24?style=for-the-badge&logo=zsh&logoColor=white)
 
 ---
 
@@ -9,16 +13,16 @@ My personal configuration files for Fedora Workstation with Hyprland, including 
 
 - [Setting Up a New PC](#-setting-up-a-new-pc)
 - [Quick Start](#-quick-start-existing-installation)
+- [Scripts Overview](#-scripts-overview)
 - [Repository Management](#-repository-management)
 - [Package Management](#-package-management)
 - [Updating Configurations](#-updating-configurations)
 - [How It Works](#-how-it-works)
 - [Development Tools](#-development-tools)
-  - [Python with UV](#python-development-with-uv)
-  - [Rust](#rust-development)
 - [SSH Key Setup](#-ssh-key-setup)
 - [Daily Workflow](#-daily-workflow)
 - [Troubleshooting](#-troubleshooting)
+- [Quick Reference](#-quick-reference)
 
 ---
 
@@ -71,8 +75,6 @@ This installs:
 - Belgian eID
 - All COPR repos (Hyprland, PyCharm, SwayNotificationCenter, etc.)
 
-See [consign/REPOS-SETUP.md](consign/REPOS-SETUP.md) for detailed repository information.
-
 #### Step 5: Install Packages
 
 ```bash
@@ -80,7 +82,7 @@ See [consign/REPOS-SETUP.md](consign/REPOS-SETUP.md) for detailed repository inf
 sudo dnf install $(cat packages.txt)
 
 # Install Flatpaks
-cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
+cat flatpaks.txt | xargs -I {} flatpak install -y flathub {}
 ```
 
 #### Step 6: Apply Your Dotfiles
@@ -103,46 +105,6 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 Your personalized Hyprland setup is now ready! 🎉
 
-### Alternative: Dotfiles Only (Advanced Users)
-
-⚠️ **Warning:** This skips JaKooLit's system setup. Only use if you know what you're doing.
-
-```bash
-git clone git@github.com:LoicPil/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-
-# Setup repositories FIRST
-./setup-repos.sh
-
-# Install all packages
-sudo dnf install $(cat packages.txt)
-cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
-
-# Apply configs
-./install.sh
-
-# Reboot
-sudo reboot
-```
-
-**Note:** JaKooLit's installer does more than install packages - it configures SDDM, audio pipelines, systemd services, etc. Using only dotfiles might miss critical system setup.
-
----
-
-## 📖 Complete Recovery Guide
-
-For detailed step-by-step instructions on setting up a new machine:
-
-- ✅ Restoring SSH keys from Raspberry Pi backup
-- ✅ Recovering personal data (Documents, Pictures, Videos)
-- ✅ Complete installation checklist with proper order
-- ✅ Troubleshooting common issues
-- ✅ Post-installation verification steps
-
-**📚 See: [consign/README.md](consign/README.md)**
-
-This comprehensive guide includes everything you need to completely restore your system from scratch, including data recovery from your Raspberry Pi backup.
-
 ---
 
 ## 🚀 Quick Start (Existing Installation)
@@ -157,21 +119,65 @@ cd ~/dotfiles
 # Setup repositories (REQUIRED FIRST!)
 ./setup-repos.sh
 
-# Install dotfiles (automatically initializes submodules and creates symlinks)
+# Install dotfiles
 ./install.sh
 
 # Optional: Install all packages from backup
 sudo dnf install $(cat packages.txt)
-cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
+cat flatpaks.txt | xargs -I {} flatpak install -y flathub {}
 ```
 
 ### Uninstallation
 
-To remove all dotfiles symlinks:
-
 ```bash
 cd ~/dotfiles
 ./uninstall.sh
+```
+
+---
+
+## 🔧 Scripts Overview
+
+All scripts are organized in the `scripts/` directory. Symlinks at the root provide easy access.
+
+### Main Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `install.sh` | Creates symlinks, initializes submodules, sets up dotfiles |
+| `uninstall.sh` | Removes all symlinks |
+| `sync-configs.sh` | Syncs configs after external installers break symlinks |
+| `backup-system.sh` | Full system backup (repos + packages + flatpaks) |
+| `restore-system.sh` | Full system restore from backup |
+| `cleanup-backups.sh` | Keep only the 2 most recent backups |
+
+### Maintenance Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `setup-repos.sh` | Configures all required DNF repositories |
+| `update-repos.sh` | Saves current repository configuration |
+| `update-packages.sh` | Updates package lists (DNF + Flatpak) |
+
+### Usage Examples
+
+```bash
+cd ~/dotfiles
+
+# Full system backup
+./backup-system.sh
+
+# Restore everything on a new system
+./restore-system.sh
+
+# Clean old backups (keeps only 2 most recent)
+./cleanup-backups.sh
+
+# Setup repositories only
+./setup-repos.sh
+
+# Update package lists only
+./update-packages.sh
 ```
 
 ---
@@ -181,8 +187,6 @@ cd ~/dotfiles
 ### Setup Repositories on Fresh System
 
 **⚠️ CRITICAL:** Always setup repositories BEFORE installing packages!
-
-Without the proper repositories, many packages in `packages.txt` will fail to install because DNF won't know where to find them.
 
 ```bash
 cd ~/dotfiles
@@ -196,31 +200,14 @@ This configures:
 - **Google Chrome** - Google's web browser
 - **Opera** - Opera web browser
 - **Belgian eID** - Belgian electronic ID card support
-- **COPR Repositories:**
-  - `solopasha/hyprland` - Hyprland compositor
-  - `msmafra/hyprland` - Additional Hyprland packages
-  - `sdegler/hyprland` - Hyprland development packages
-  - `tofik/nwg-shell` - Wayland shell components
-  - `erikreider/SwayNotificationCenter` - Notification daemon
-  - `phracek/PyCharm` - Python IDE
-  - `errornointernet/packages` - Additional utilities
-
-**For detailed repository information, see:** [consign/REPOS-SETUP.md](consign/REPOS-SETUP.md)
+- **COPR Repositories:** Hyprland, PyCharm, SwayNotificationCenter, lazygit, and more
 
 ### Update Repository List
-
-Keep your repository list synchronized with your current system:
 
 ```bash
 cd ~/dotfiles
 ./update-repos.sh
-```
 
-This creates/updates `repos.txt` with your current repository configuration.
-
-Then commit the changes:
-
-```bash
 git add repos.txt
 git commit -m "Update repository list"
 git push
@@ -232,8 +219,6 @@ git push
 
 ### Update Package Lists
 
-Keep your package lists synchronized with your current system:
-
 ```bash
 cd ~/dotfiles
 ./update-packages.sh
@@ -242,7 +227,7 @@ cd ~/dotfiles
 This updates both:
 
 - `packages.txt` - All user-installed DNF packages
-- `flatpaks-clean.txt` - All installed Flatpak applications
+- `flatpaks.txt` - All installed Flatpak applications
 
 ### Restore Packages on a Fresh System
 
@@ -253,10 +238,8 @@ cd ~/dotfiles
 
 # THEN: Install packages
 sudo dnf install $(cat packages.txt)
-cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
+cat flatpaks.txt | xargs -I {} flatpak install -y flathub {}
 ```
-
-**Note:** Some package names may differ between Fedora versions. Use `dnf search <package>` to find replacements.
 
 ---
 
@@ -264,73 +247,31 @@ cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
 
 ### Method 1: Automatic Updates via Waybar Button (Recommended)
 
-Your Waybar includes an automatic update checker that monitors JaKooLit's repository.
-
-#### How It Works
-
-1. **Click the update button** in Waybar
+1. Click the update button in Waybar
 2. Compares your local version with JaKooLit's GitHub
 3. Shows notification if update available
 4. One-click update process
 
-#### Update Process
-
-When you click **"Update"**:
+### After Update: Review and Commit
 
 ```bash
-# The system automatically:
-1. Opens Kitty terminal
-2. Updates ~/Hyprland-Dots (git pull)
-3. Runs upgrade-custom.sh from UserScripts/
-4. Creates backups in ~/dotfiles/backup/TIMESTAMP/
-5. Applies changes directly to your dotfiles (via symlinks)
-```
-
-#### After Update: Review and Commit
-
-Since your configs are symlinked to `~/dotfiles/`, changes go directly there:
-
-```bash
-# Review what changed
 cd ~/dotfiles
 git status
 git diff
 
-# Commit and push
 git add .
 git commit -m "Update from JaKooLit v2.X.X"
 git push
 ```
 
-#### What Gets Updated
-
-The script compares and updates these directories:
-
-- `hypr/` (excludes UserConfigs/ and UserScripts/)
-- `waybar/` (excludes your config and style.css)
-- `rofi/`, `kitty/`, `swaync/`, `wlogout/`, `wallust/`, etc.
-
-**Your personal files are NEVER touched:**
-
-- ✅ `hypr/UserConfigs/` - Safe
-- ✅ `hypr/UserScripts/` - Safe
-- ✅ `waybar/config` and `waybar/style.css` - Safe
-
 ### Method 2: Manual Update
 
-Update manually from terminal:
-
 ```bash
-# Update Hyprland-Dots
 cd ~/Hyprland-Dots
 git pull
-
-# Run the custom upgrade script
 ~/.config/hypr/UserScripts/upgrade-custom.sh
 
-# Review and commit
 cd ~/dotfiles
-git status
 git add .
 git commit -m "Update from JaKooLit"
 git push
@@ -338,14 +279,10 @@ git push
 
 ### Method 3: Sync After Broken Symlinks
 
-If an external installer breaks your symlinks:
-
 ```bash
 cd ~/dotfiles
 ./sync-configs.sh
 
-# Review and commit the changes
-git status
 git add .
 git commit -m "Sync configs after external update"
 git push
@@ -367,62 +304,45 @@ The install script creates symlinks from your home directory to the dotfiles rep
 # etc...
 ```
 
-**Benefits:**
-
-- ✅ Edit files in `~/dotfiles/` and changes apply immediately
-- ✅ All configs are version controlled
-- ✅ Easy to sync across multiple machines
-- ✅ Backups created automatically before any changes
-
-### Scripts Overview
-
-| Script | Purpose |
-|--------|---------|
-| `install.sh` | Creates symlinks, initializes submodules, sets up dotfiles |
-| `uninstall.sh` | Removes all symlinks |
-| `setup-repos.sh` | **NEW** - Configures all required DNF repositories |
-| `update-repos.sh` | **NEW** - Saves current repository configuration |
-| `update-packages.sh` | Updates package lists with currently installed packages |
-| `sync-configs.sh` | Syncs configs after external installers break symlinks |
-| `hypr/scripts/KooLsDotsUpdate.sh` | Checks for updates from Waybar button |
-| `hypr/UserScripts/upgrade-custom.sh` | Custom upgrade script with dotfiles backup |
-
 ### Repository Structure
 
 ```
 dotfiles/
 ├── backup/              # Timestamped backups (gitignored)
-├── Upgrade-Logs/        # Update logs (gitignored)
-├── btop/                # System monitor configuration
+├── backups/             # System backups from backup-system.sh
 ├── consign/             # Complete recovery & installation guide
-│   ├── README.md        # Detailed recovery instructions
-│   └── REPOS-SETUP.md   # Repository setup documentation
+├── scripts/             # ALL scripts organized here
+│   ├── install.sh
+│   ├── uninstall.sh
+│   ├── sync-configs.sh
+│   ├── backup-system.sh
+│   ├── restore-system.sh
+│   ├── cleanup-backups.sh
+│   ├── setup-repos.sh
+│   ├── update-repos.sh
+│   └── update-packages.sh
+├── btop/                # System monitor configuration
+├── cava/                # Audio visualizer
 ├── emacs/               # Emacs configuration
 ├── git/                 # Git configuration
 ├── hypr/                # Hyprland window manager
-│   ├── UserConfigs/     # Your personal Hyprland settings (preserved during updates)
-│   ├── UserScripts/     # Your custom scripts (preserved during updates)
-│   └── scripts/         # System scripts
 ├── kitty/               # Kitty terminal emulator
+├── Kvantum/             # Theme engine
 ├── nvim/                # Neovim configuration
 ├── oh-my-zsh/           # Oh My Zsh framework (submodule)
+├── qt5ct/ qt6ct/        # Qt configuration
 ├── rofi/                # Application launcher
 ├── ssh/                 # SSH config (keys NOT tracked!)
 ├── swaync/              # Notification daemon
-├── vim/                 # Vim configuration
+├── swappy/              # Screenshot tool
 ├── wallust/             # Wallpaper & color scheme manager
 ├── waybar/              # Status bar
 ├── wlogout/             # Logout menu
 ├── zsh/                 # Zsh configuration
-├── flatpaks-clean.txt   # Flatpak applications list
+├── flatpaks.txt         # Flatpak applications list
 ├── packages.txt         # DNF packages list
-├── repos.txt            # Repository configuration (NEW)
-├── install.sh           # Installation script
-├── uninstall.sh         # Uninstallation script
-├── setup-repos.sh       # Repository setup script (NEW)
-├── update-repos.sh      # Repository list updater (NEW)
-├── update-packages.sh   # Package list updater
-└── sync-configs.sh      # Sync script for external updates
+├── repos.txt            # Repository configuration
+└── [symlinks to scripts/*.sh]
 ```
 
 ---
@@ -431,26 +351,19 @@ dotfiles/
 
 ### Python Development with UV
 
-[UV](https://github.com/astral-sh/uv) is a fast Python package installer and resolver.
+UV is a fast Python package installer and resolver.
 
 #### Install UV
 
 ```bash
-# Install UV
 curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Or via pip
-pip install uv
 ```
 
 #### Initialize a New Python Project
 
 ```bash
-# Create a new project directory
 mkdir ~/my-python-project
 cd ~/my-python-project
-
-# Initialize UV project (creates pyproject.toml and virtual environment)
 uv init
 
 # Or with specific Python version
@@ -471,13 +384,6 @@ uv sync
 
 # Run Python with virtual environment
 uv run python script.py
-
-# Run specific commands
-uv run pytest
-uv run black .
-
-# Activate virtual environment manually (if needed)
-source .venv/bin/activate
 ```
 
 #### Common UV Commands
@@ -492,49 +398,14 @@ uv pip freeze           # Export dependencies
 uv lock                 # Update lockfile
 ```
 
-#### Example: Quick Python Script
-
-```bash
-# Create new project
-mkdir ~/projects/data-analysis
-cd ~/projects/data-analysis
-
-# Initialize with UV
-uv init
-
-# Add dependencies
-uv add pandas matplotlib
-
-# Create a script
-cat > analyze.py << 'EOF'
-import pandas as pd
-import matplotlib.pyplot as plt
-
-data = {'x': [1, 2, 3, 4], 'y': [10, 20, 25, 30]}
-df = pd.DataFrame(data)
-df.plot(x='x', y='y')
-plt.show()
-EOF
-
-# Run it
-uv run python analyze.py
-```
-
----
-
 ### Rust Development
 
-[Rust](https://www.rust-lang.org/) is a systems programming language focused on safety, speed, and concurrency.
+Rust is a systems programming language focused on safety, speed, and concurrency.
 
 #### Install Rust
 
-Rust is installed via `rustup`, which manages Rust versions and associated tools:
-
 ```bash
-# Install Rust (interactive installer)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-# Reload shell to use Rust
 source ~/.cargo/env
 
 # Verify installation
@@ -542,41 +413,21 @@ rustc --version
 cargo --version
 ```
 
-**What gets installed:**
-
-- `~/.cargo/` - Cargo home directory (packages and binaries)
-- `~/.rustup/` - Rustup home directory (Rust toolchains)
-
 #### Creating a New Rust Project
 
 ```bash
-# Create a new binary project
 mkdir ~/projects
 cd ~/projects
 cargo new my-app
-
-# This creates:
-# my-app/
-# ├── Cargo.toml       # Project manifest
-# └── src/
-#     └── main.rs      # Main source file
 ```
 
 #### Working with Cargo
 
 ```bash
-# Create a new project
-cargo new project-name       # Binary (application)
-cargo new --lib library-name # Library
-
-# Build and run
 cd project-name
 cargo build                  # Build in debug mode
 cargo build --release        # Build optimized
 cargo run                    # Build and run
-cargo run -- arg1 arg2       # Run with arguments
-
-# Testing and checking
 cargo test                   # Run tests
 cargo check                  # Check code without building
 cargo clippy                 # Run linter
@@ -602,84 +453,12 @@ cargo clean                  # Clean build artifacts
 cargo doc --open             # Generate and open docs
 ```
 
-#### Example: Hello World
-
-```bash
-# Create a new project
-cd ~/projects
-cargo new hello-rust
-cd hello-rust
-
-# Edit src/main.rs
-cat > src/main.rs << 'EOF'
-fn main() {
-    println!("Hello, Rust!");
-    
-    let name = "World";
-    println!("Hello, {}!", name);
-}
-EOF
-
-# Run it
-cargo run
-```
-
-#### Example: Project with Dependencies
-
-```bash
-# Create a project
-cargo new json-parser
-cd json-parser
-
-# Add a dependency
-cargo add serde serde_json
-
-# Edit src/main.rs
-cat > src/main.rs << 'EOF'
-use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize, Debug)]
-struct Person {
-    name: String,
-    age: u32,
-}
-
-fn main() {
-    let person = Person {
-        name: "Alice".to_string(),
-        age: 30,
-    };
-    
-    // Serialize to JSON
-    let json = serde_json::to_string(&person).unwrap();
-    println!("JSON: {}", json);
-    
-    // Deserialize from JSON
-    let parsed: Person = serde_json::from_str(&json).unwrap();
-    println!("Parsed: {:?}", parsed);
-}
-EOF
-
-# Run it
-cargo run
-```
-
 #### Updating Rust
 
 ```bash
-# Update Rust toolchain
 rustup update
-
-# Check current version
 rustc --version
 ```
-
-#### Useful Resources
-
-- [The Rust Book](https://doc.rust-lang.org/book/) - Official learning resource
-- [Rust by Example](https://doc.rust-lang.org/rust-by-example/) - Learn by examples
-- [Cargo Book](https://doc.rust-lang.org/cargo/) - Cargo documentation
-- [crates.io](https://crates.io/) - Rust package registry
 
 ---
 
@@ -720,15 +499,6 @@ fi
 ssh-add ~/.ssh/id_ed25519 2>/dev/null
 ```
 
-For multiple keys:
-
-```bash
-KEYS=(~/.ssh/id_ed25519 ~/.ssh/id_github_rsa)
-for key in "${KEYS[@]}"; do
-    [ -f "$key" ] && ssh-add -q "$key" 2>/dev/null
-done
-```
-
 ### Test Connection
 
 ```bash
@@ -740,8 +510,6 @@ ssh -T git@github.com
 ## 🔄 Daily Workflow
 
 ### Making Changes
-
-Since configs are symlinked, just edit and commit:
 
 ```bash
 # Edit any config file
@@ -769,7 +537,7 @@ git pull
 ```bash
 cd ~/dotfiles
 ./update-packages.sh
-git add packages.txt flatpaks-clean.txt
+git add packages.txt flatpaks.txt
 git commit -m "Update package lists"
 git push
 ```
@@ -791,14 +559,11 @@ git push
 - **Repositories First**: Always run `./setup-repos.sh` BEFORE installing packages
 - **SSH Keys**: Private keys are NOT tracked in git (see `.gitignore`)
 - **Backups**: Created automatically in `~/dotfiles/backup/TIMESTAMP/` during updates
-- **Update Logs**: Saved in `~/dotfiles/Upgrade-Logs/`
 - **Oh-my-zsh**: Managed as a git submodule (automatically initialized by `install.sh`)
 - **Package Lists**: Auto-generated by `update-packages.sh` - don't edit manually
 - **Repository List**: Auto-generated by `update-repos.sh` - don't edit manually
 - **Protected Configs**: UserConfigs/, UserScripts/, and personal waybar styles are never overwritten
-- **JaKooLit First**: Always install JaKooLit's Hyprland setup before applying your dotfiles on a new system
-- **Version Tracking**: File `hypr/v2.X.X` tracks your current Hyprland dots version
-- **Development Tools**: Rust and UV are installed in user directories (`~/.cargo/` and `~/.local/`)
+- **JaKooLit First**: Always install JaKooLit's Hyprland setup before applying your dotfiles
 
 ---
 
@@ -823,13 +588,6 @@ sudo dnf install $(cat packages.txt)
 dnf repolist
 ```
 
-**Re-setup all repositories**
-
-```bash
-cd ~/dotfiles
-./setup-repos.sh
-```
-
 ### Update Issues
 
 **"No update available" message**
@@ -839,11 +597,6 @@ cd ~/dotfiles
 # Check manually:
 ls ~/Hyprland-Dots/config/hypr/v*
 ```
-
-**Want to skip specific updates**
-
-- The upgrade script asks confirmation for each directory
-- Simply answer "N" for directories you don't want to update
 
 ### Restore from Backup
 
@@ -856,22 +609,12 @@ ls ~/dotfiles/backup/
 **Restore specific config:**
 
 ```bash
-# Restore from backup
 cp -r ~/dotfiles/backup/TIMESTAMP/hypr ~/dotfiles/
 
-# Commit the restoration
 cd ~/dotfiles
 git add .
 git commit -m "Restore hypr config from backup"
 git push
-```
-
-### Reinstall Dotfiles
-
-```bash
-cd ~/dotfiles
-./uninstall.sh
-./install.sh
 ```
 
 ### Check Symlinks
@@ -881,87 +624,6 @@ cd ~/dotfiles
 ls -la ~/.config/nvim   # Should show → /home/username/dotfiles/nvim
 ls -la ~/.config/hypr   # Should show → /home/username/dotfiles/hypr
 ```
-
-### After External Installer Breaks Symlinks
-
-```bash
-cd ~/dotfiles
-./sync-configs.sh
-```
-
-### Hyprland Won't Start
-
-If you installed dotfiles without JaKooLit first:
-
-1. Install JaKooLit's Hyprland setup
-2. Reboot into Hyprland
-3. Run `./install.sh` again to apply your configs
-
-### View Update Logs
-
-```bash
-# View recent update logs
-ls ~/dotfiles/Upgrade-Logs/
-cat ~/dotfiles/Upgrade-Logs/upgrade-*.log
-```
-
-### Development Tools Issues
-
-**Rust not found after restart**
-
-```bash
-# Make sure Rust is in PATH
-source ~/.cargo/env
-
-# Or restart shell
-exec zsh
-```
-
-**UV not found**
-
-```bash
-# Reinstall UV
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
----
-
-## 📚 Additional Resources
-
-### Dotfiles & Hyprland
-
-- **[Complete Recovery Guide](consign/README.md)** - Detailed instructions for fresh installations and data recovery
-- **[Repository Setup Guide](consign/REPOS-SETUP.md)** - Detailed repository configuration instructions
-- [JaKooLit's Fedora-Hyprland](https://github.com/JaKooLit/Fedora-Hyprland) - System installation
-- [JaKooLit's Hyprland-Dots](https://github.com/JaKooLit/Hyprland-Dots) - Upstream configurations
-- [Hyprland Wiki](https://wiki.hyprland.org/) - Official documentation
-
-### Development Tools
-
-- [UV Documentation](https://github.com/astral-sh/uv) - Python package manager
-- [The Rust Book](https://doc.rust-lang.org/book/) - Learn Rust
-- [Rust by Example](https://doc.rust-lang.org/rust-by-example/) - Practical examples
-- [crates.io](https://crates.io/) - Rust packages
-
-### Shell & Config
-
-- [Oh My Zsh](https://ohmyz.sh/) - Zsh framework
-
----
-
-## 💾 Backup Information
-
-**Primary Backup Location:** `smb://raspberrypinas.local/backuploic/backup-laptop-piletteloic`
-
-**Local Backups:**
-
-- Configuration backups: `~/dotfiles/backup/TIMESTAMP/`
-- Update logs: `~/dotfiles/Upgrade-Logs/`
-
-**Development Tools:**
-
-- Rust: `~/.cargo/` and `~/.rustup/` (not backed up)
-- UV: `~/.local/share/uv/` (not backed up)
 
 ---
 
@@ -983,7 +645,7 @@ cd ~/dotfiles
 
 # 4. Install packages
 sudo dnf install $(cat packages.txt)
-cat flatpaks-clean.txt | xargs -I {} flatpak install -y flathub {}
+cat flatpaks.txt | xargs -I {} flatpak install -y flathub {}
 
 # 5. Apply dotfiles
 ./install.sh
@@ -993,50 +655,29 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-### Daily Usage
-
-```bash
-# Update from Waybar button → Click update button
-# OR manually:
-cd ~/Hyprland-Dots && git pull
-~/.config/hypr/UserScripts/upgrade-custom.sh
-
-# Then commit changes:
-cd ~/dotfiles && git status && git add . && git commit -m "Update" && git push
-```
-
-### Development
-
-```bash
-# Python project
-cd ~/projects && uv init my-project && cd my-project
-uv add requests && uv run python script.py
-
-# Rust project
-cd ~/projects && cargo new my-app && cd my-app
-cargo run
-```
-
 ### Maintenance
 
 ```bash
-# Update package lists
-cd ~/dotfiles && ./update-packages.sh
+# Full system backup (repos + packages + flatpaks)
+./backup-system.sh
 
-# Update repository list
-cd ~/dotfiles && ./update-repos.sh
+# Full system restore
+./restore-system.sh
+
+# Update package lists only
+./update-packages.sh
+
+# Update repository list only
+./update-repos.sh
+
+# Clean old backups (keeps 2 most recent)
+./cleanup-backups.sh
 
 # Reinstall dotfiles
-cd ~/dotfiles && ./uninstall.sh && ./install.sh
+./uninstall.sh && ./install.sh
 
 # Restore from backup
-cp -r ~/dotfiles/backup/TIMESTAMP/config ~/dotfiles/
-
-# Update development tools
-rustup update  # Update Rust
-
-# Re-setup repositories
-./setup-repos.sh
+cp -r backup/20260831_114623/hypr ~/dotfiles/
 ```
 
 ---
