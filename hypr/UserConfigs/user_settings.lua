@@ -25,3 +25,10 @@
 -- 		warp_on_change_workspace = 0,
 -- 	},
 -- })
+hl.config({
+	input = {
+		kb_layout = "be,us",
+		kb_options = "grp:alt_shift_toggle",
+		resolve_binds_by_sym = true,
+	},
+})

@@ -115,7 +115,9 @@ alias sqlite3='sqlite3 -cmd ".headers on" -cmd ".mode column"'
 alias update='sudo dnf update && flatpak update'
 alias settings='gnome-control-center'
 alias pdf='evince'
-pdfo(){evince "$1" & disown;}
+pdfo() {
+    evince "$@" & disown
+}
 # Dotfiles management
 alias dotupdate='cd ~/dotfiles && ./update-packages.sh'
 

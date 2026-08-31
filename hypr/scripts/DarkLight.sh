@@ -25,7 +25,9 @@ theme_state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/hypr"
 theme_state_file="$theme_state_dir/theme_mode"
 legacy_theme_state_file="$HOME/.cache/.theme_mode"
 
-kitty_conf="${XDG_CONFIG_HOME:-$HOME/.config}/kitty/kitty.conf"
+user_kitty_conf="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/UserConfigs/kitty.conf"
+fallback_kitty_conf="${XDG_CONFIG_HOME:-$HOME/.config}/kitty/kitty.conf"
+kitty_conf="$user_kitty_conf"
 
 wallust_config="${XDG_CONFIG_HOME:-$HOME/.config}/wallust/wallust.toml"
 pallete_dark="dark16"
@@ -38,6 +40,25 @@ apply_saved_mode=0
 notify_enabled=1
 preserve_wallpaper=0
 forced_mode=""
+no_restart=0
+
+ensure_managed_kitty_conf() {
+    if [[ -f "$user_kitty_conf" && -r "$user_kitty_conf" ]]; then
+        kitty_conf="$user_kitty_conf"
+        return 0
+    fi
+
+    if [[ -r "$fallback_kitty_conf" ]]; then
+        mkdir -p "$(dirname "$user_kitty_conf")" 2>/dev/null || true
+        cp -f "$fallback_kitty_conf" "$user_kitty_conf" 2>/dev/null || true
+        if [[ -f "$user_kitty_conf" && -r "$user_kitty_conf" ]]; then
+            kitty_conf="$user_kitty_conf"
+            return 0
+        fi
+    fi
+
+    kitty_conf="$fallback_kitty_conf"
+}
 
 normalize_mode() {
     case "$1" in
@@ -72,14 +93,18 @@ while [ $# -gt 0 ]; do
         --preserve-wallpaper)
             preserve_wallpaper=1
             ;;
+        --no-restart)
+            no_restart=1
+            ;;
         --help)
             cat <<'EOF'
-Usage: DarkLight.sh [--apply-current] [--mode Dark|Light] [--no-notify] [--preserve-wallpaper]
+Usage: DarkLight.sh [--apply-current] [--mode Dark|Light] [--no-notify] [--preserve-wallpaper] [--no-restart]
   (no args)            Toggle between Dark and Light and persist selection
   --apply-current      Re-apply saved mode (defaults to Dark when unset)
   --mode <mode>        Force target mode to Dark or Light
   --no-notify          Suppress notifications
   --preserve-wallpaper Keep current wallpaper instead of choosing random Dynamic-Wallpapers image
+  --no-restart         Apply theme settings only; skip killing processes and running Refresh.sh
 EOF
             exit 0
             ;;
@@ -87,10 +112,13 @@ EOF
     shift
 done
 
-# intial kill process
-for pid in waybar rofi swaync ags swaybg; do
-    killall -SIGUSR1 "$pid"
-done
+# Signal running processes to prepare for theme change.
+# Skip hiding waybar on startup (--no-restart) so it stays visible while colors regenerate.
+if [ "$no_restart" -eq 0 ]; then
+    for pid in waybar rofi swaync ags swaybg; do
+        killall -SIGUSR1 "$pid"
+    done
+fi
 
 
 # Initialize wallpaper daemon if needed
@@ -143,17 +171,52 @@ fi
 
 # Function to set Waybar style
 set_waybar_style() {
-    theme="$1"
-    waybar_styles="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/style"
-    waybar_style_link="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/style.css"
-    style_prefix="\\[${theme}\\].*\\.css$"
+    local theme="$1"
+    local waybar_styles="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/style"
+    local waybar_style_link="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/style.css"
 
-    style_file=$(find -L "$waybar_styles" -maxdepth 1 -type f -regex ".*$style_prefix" | shuf -n 1)
+    # If re-applying saved mode on startup (--apply-current), do NOT change the user's existing style.css
+    if [ "$apply_saved_mode" -eq 1 ]; then
+        if [ -L "$waybar_style_link" ] || [ -f "$waybar_style_link" ]; then
+            return 0
+        fi
+    fi
 
-    if [ -n "$style_file" ]; then
-        ln -sf "$style_file" "$waybar_style_link"
-    else
-        echo "Style file not found for $theme theme."
+    # When toggling mode (Dark <-> Light), preserve style if valid or switch to matching counterpart
+    if [ -L "$waybar_style_link" ]; then
+        local current_style_target current_style_base counterpart
+        current_style_target="$(readlink -f "$waybar_style_link" 2>/dev/null || true)"
+        current_style_base="$(basename "$current_style_target" 2>/dev/null || true)"
+
+        # Wallust, Chroma, and universal extra styles adapt automatically; keep them
+        if [[ "$current_style_base" =~ ^(Wallust|Chroma|\[Extra\]) ]]; then
+            return 0
+        fi
+
+        if [ "$theme" = "Light" ]; then
+            counterpart="${current_style_base//Dark/Light}"
+            counterpart="${counterpart//dark/light}"
+        else
+            counterpart="${current_style_base//Light/Dark}"
+            counterpart="${counterpart//light/dark}"
+        fi
+
+        if [ -n "$counterpart" ] && [ -f "$waybar_styles/$counterpart" ]; then
+            ln -sf "$waybar_styles/$counterpart" "$waybar_style_link"
+            return 0
+        fi
+
+        # If no counterpart exists, keep user's existing style rather than randomizing
+        return 0
+    fi
+
+    # Initial fallback if no style is set at all
+    if [ ! -e "$waybar_style_link" ]; then
+        local style_file
+        style_file="$(find -L "$waybar_styles" -maxdepth 1 -type f \( -iname "${theme}-*.css" -o -iname "${theme}_*.css" -o -iname "[${theme}]*.css" -o -iname "${theme}*.css" \) | sort | head -n 1)"
+        if [ -n "$style_file" ]; then
+            ln -sf "$style_file" "$waybar_style_link"
+        fi
     fi
 }
 
@@ -185,14 +248,19 @@ if command -v ags >/dev/null 2>&1; then
 fi
 
 # kitty background color change
+ensure_managed_kitty_conf
 if [ "$next_mode" = "Dark" ]; then
-    sed -i '/^foreground /s/^foreground .*/foreground #dddddd/' "${kitty_conf}"
-	sed -i '/^background /s/^background .*/background #000000/' "${kitty_conf}"
-	sed -i '/^cursor /s/^cursor .*/cursor #dddddd/' "${kitty_conf}"
+    if [[ -w "$kitty_conf" ]]; then
+        sed -i '/^foreground /s/^foreground .*/foreground #dddddd/' "${kitty_conf}"
+	    sed -i '/^background /s/^background .*/background #000000/' "${kitty_conf}"
+	    sed -i '/^cursor /s/^cursor .*/cursor #dddddd/' "${kitty_conf}"
+    fi
 else
-	sed -i '/^foreground /s/^foreground .*/foreground #000000/' "${kitty_conf}"
-	sed -i '/^background /s/^background .*/background #dddddd/' "${kitty_conf}"
-	sed -i '/^cursor /s/^cursor .*/cursor #000000/' "${kitty_conf}"
+    if [[ -w "$kitty_conf" ]]; then
+	    sed -i '/^foreground /s/^foreground .*/foreground #000000/' "${kitty_conf}"
+	    sed -i '/^background /s/^background .*/background #dddddd/' "${kitty_conf}"
+	    sed -i '/^cursor /s/^cursor .*/cursor #000000/' "${kitty_conf}"
+    fi
 fi
 
 for pid_kitty in $(pidof kitty); do
@@ -317,19 +385,28 @@ set_custom_gtk_theme "$next_mode"
 update_theme_mode
 
 
-${SCRIPTSDIR}/WallustSwww.sh &&
+${SCRIPTSDIR}/WallustSwww.sh
 
-sleep 2
-# kill process
-for pid1 in waybar rofi swaync ags swaybg; do
-    killall "$pid1"
-done
+if [ "$no_restart" -eq 0 ]; then
+    sleep 2
+    # kill process
+    # NOTE: waybar is deliberately excluded here. This script is usually launched from a
+    # waybar module on-click, so it lives in waybar.service's cgroup. Killing waybar makes
+    # systemd tear down the whole unit, taking this script with it before Refresh.sh runs.
+    # Refresh.sh restarts waybar detached from that cgroup instead.
+    for pid1 in rofi swaync ags swaybg; do
+        killall "$pid1"
+    done
+    sleep 1
+    ${SCRIPTSDIR}/Refresh.sh
+    sleep 0.5
+else
+    # Reload waybar in-place so it picks up the newly generated wallust colors.
+    # SIGUSR2 = reload config/CSS without restarting the process.
+    systemctl --user reload waybar.service 2>/dev/null || killall -SIGUSR2 waybar 2>/dev/null || true
+fi
 
-sleep 1
-${SCRIPTSDIR}/Refresh.sh 
-
-sleep 0.5
-# Display notifications for theme and icon changes 
+# Display notifications for theme and icon changes
 [ "$notify_enabled" -eq 1 ] && notify-send -u low -i "$notif" " Themes switched to:" " $next_mode Mode"
 
 exit 0
