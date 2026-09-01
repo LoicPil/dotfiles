@@ -11,17 +11,9 @@ SCRIPTSDIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/scripts"
 # shellcheck source=/dev/null
 . "$SCRIPTSDIR/WallpaperCmd.sh"
 
-if command -v "$WWW_DAEMON" >/dev/null 2>&1 && command -v "$WWW_CMD" >/dev/null 2>&1 && ! pgrep -x "$WWW_DAEMON" >/dev/null 2>&1; then
-  "$WWW_DAEMON" "${WWW_DAEMON_ARGS[@]}" &
-fi
+wallpaper_ensure_daemon
 
-# Give the daemon a moment to become ready
-for _ in {1..50}; do
-  "$WWW_CMD" query >/dev/null 2>&1 && break
-  sleep 0.1
-done
-
-wallpaper_link="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/.current_wallpaper"
+wallpaper_link="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/rofi/.current_wallpaper"
 wallpaper_current="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/wallpaper_effects/.wallpaper_current"
 
 read_cached_wallpaper() {
@@ -66,7 +58,7 @@ default_wallpaper_path() {
 
 apply_wallpaper_for_monitor() {
   local monitor="$1"
-  local per_monitor_link="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/.current_wallpaper_${monitor}"
+  local per_monitor_link="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/rofi/.current_wallpaper_${monitor}"
   local per_monitor_current="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/wallpaper_effects/.wallpaper_current_${monitor}"
   local wallpaper_path=""
 
@@ -147,7 +139,6 @@ done < <(wait_for_monitors || true)
 
 "$SCRIPTSDIR/RofiFocusedWallpaperLink.sh" >/dev/null 2>&1 || true
 
-waybar_colors="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/wallust/colors-waybar.css"
-if [ ! -s "$waybar_colors" ] && [ -n "$applied_wallpaper" ] && [ -x "$SCRIPTSDIR/WallustSwww.sh" ]; then
+if [ -n "$applied_wallpaper" ] && [ -x "$SCRIPTSDIR/WallustSwww.sh" ]; then
   "$SCRIPTSDIR/WallustSwww.sh" "$applied_wallpaper" >/dev/null 2>&1 || true
 fi

@@ -16,10 +16,12 @@ local function resolve_cmd(cmd)
   local resolved_term = defaults.term or os.getenv("TERMINAL") or "kitty"
   local resolved_files = defaults.files or "thunar"
   local resolved_edit = defaults.edit or os.getenv("EDITOR") or "nano"
+  local resolved_visual = defaults.visual or os.getenv("VISUAL") or ""
   cmd = tostring(cmd)
   cmd = cmd:gsub("%$term", resolved_term)
   cmd = cmd:gsub("%$files", resolved_files)
   cmd = cmd:gsub("%$edit", resolved_edit)
+  cmd = cmd:gsub("%$visual", resolved_visual)
   return cmd
 end
 
@@ -342,7 +344,7 @@ end
 bind(
   "SUPER",
   "D",
-  exec_cmd("pkill rofi || true; $HOME/.config/hypr/scripts/RofiFocusedWallpaperLink.sh >/dev/null 2>&1 || true; rofi -show drun -modi drun, filebrowser,run,window"),
+  exec_cmd("pkill rofi || true; $HOME/.config/hypr/scripts/RofiFocusedWallpaperLink.sh >/dev/null 2>&1 || true; rofi -show drun -modi drun,filebrowser,run,window -config $HOME/.config/hypr/rofi/config.rasi"),
   { description = "app launcher" }
 )
 bind("SUPER", "B", exec_cmd('xdg-open "https://"'), { description = "open default browser" })
@@ -373,7 +375,7 @@ bind("SUPER", "S", exec_cmd("$HOME/.config/hypr/scripts/RofiSearch.sh"), { descr
 bind(
   "SUPER CTRL",
   "S",
-  exec_cmd("$HOME/.config/hypr/scripts/RofiFocusedWallpaperLink.sh >/dev/null 2>&1 || true; rofi -show window"),
+  exec_cmd("$HOME/.config/hypr/scripts/RofiFocusedWallpaperLink.sh >/dev/null 2>&1 || true; rofi -show window -config $HOME/.config/hypr/rofi/config.rasi"),
   { description = "window switcher" }
 )
 bind("SUPER ALT", "O", exec_cmd("$HOME/.config/hypr/scripts/ChangeBlur.sh"), { description = "toggle blur" })
@@ -685,6 +687,78 @@ bind(
   exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --stop"),
   { description = "stop", locked = true }
 )
+bind(
+  "",
+  "xf86MonBrightnessDown",
+  exec_cmd("$HOME/.config/hypr/scripts/Brightness.sh --dec"),
+  { description = "decrease monitor brightness", locked = true, ["repeat"] = true }
+)
+bind(
+  "",
+  "xf86MonBrightnessUp",
+  exec_cmd("$HOME/.config/hypr/scripts/Brightness.sh --inc"),
+  { description = "increase monitor brightness", locked = true, ["repeat"] = true }
+)
+bind(
+  "CTRL ALT",
+  "equal",
+  exec_cmd("$HOME/.config/hypr/scripts/Brightness.sh --inc"),
+  { description = "increase brightness", locked = true, ["repeat"] = true }
+)
+bind(
+  "CTRL ALT",
+  "minus",
+  exec_cmd("$HOME/.config/hypr/scripts/Brightness.sh --dec"),
+  { description = "decrease brightness", locked = true, ["repeat"] = true }
+)
+bind(
+  "CTRL ALT",
+  "KP_Add",
+  exec_cmd("$HOME/.config/hypr/scripts/Brightness.sh --inc"),
+  { description = "increase brightness (numpad)", locked = true, ["repeat"] = true }
+)
+bind(
+  "CTRL ALT",
+  "KP_Subtract",
+  exec_cmd("$HOME/.config/hypr/scripts/Brightness.sh --dec"),
+  { description = "decrease brightness (numpad)", locked = true, ["repeat"] = true }
+)
+bind(
+  "",
+  "xf86KbdBrightnessDown",
+  exec_cmd("$HOME/.config/hypr/scripts/BrightnessKbd.sh --dec"),
+  { description = "decrease keyboard brightness", locked = true, ["repeat"] = true }
+)
+bind(
+  "",
+  "xf86KbdBrightnessUp",
+  exec_cmd("$HOME/.config/hypr/scripts/BrightnessKbd.sh --inc"),
+  { description = "increase keyboard brightness", locked = true, ["repeat"] = true }
+)
+bind(
+  "",
+  "xf86TouchpadToggle",
+  exec_cmd("$HOME/.config/hypr/scripts/TouchPad.sh"),
+  { description = "disable touchpad" }
+)
+bind(
+  "",
+  "xf86Launch1",
+  exec_cmd("rog-control-center"),
+  { description = "ASUS Armory crate button" }
+)
+bind(
+  "",
+  "xf86Launch3",
+  exec_cmd("asusctl led-mode -n"),
+  { description = "FN+F4 Switch keyboard RGB profile" }
+)
+bind(
+  "",
+  "xf86Launch4",
+  exec_cmd("asusctl profile -n"),
+  { description = "FN+F5 change of fan profiles" }
+)
 bind("SUPER", "Print", exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --now"), { description = "screenshot now" })
 bind(
   "SUPER SHIFT",
@@ -715,6 +789,32 @@ bind(
   "S",
   exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --swappy"),
   { description = "screenshot (swappy)" }
+)
+-- Screenshot keybindings using F6 (no PrintSrc button)
+bind("SUPER", "F6", exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --now"), { description = "screenshot" })
+bind(
+  "SUPER SHIFT",
+  "F6",
+  exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --area"),
+  { description = "screenshot (area)" }
+)
+bind(
+  "SUPER CTRL",
+  "F6",
+  exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --in5"),
+  { description = "screenshot (5 secs delay)" }
+)
+bind(
+  "SUPER ALT",
+  "F6",
+  exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --in10"),
+  { description = "screenshot (10 secs delay)" }
+)
+bind(
+  "ALT",
+  "F6",
+  exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --active"),
+  { description = "screenshot (active window only)" }
 )
 bind("SUPER SHIFT", "left", dispatch("resizeactive", "-50 0"), { description = "resize left (-50)", ["repeat"] = true })
 bind(
