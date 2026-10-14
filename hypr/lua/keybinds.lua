@@ -67,6 +67,7 @@ local app_binds = {
   },
   { "SUPER", "B", 'xdg-open "https://"', "open default browser" },
   { "SUPER", "A", "$HOME/.config/hypr/scripts/OverviewToggle.sh", "desktop overview" },
+  { "SUPER CTRL", "A", "pkill rofi || true && ags -t 'overview'", "Ags overview" },
   { "SUPER", "Return", "$HOME/.config/hypr/scripts/LaunchTerminal.sh '$term'", "Open terminal" },
   {
     "SUPER",
@@ -77,7 +78,7 @@ local app_binds = {
   { "SUPER", "C", "$HOME/.config/hypr/scripts/rofi-ssh-menu.sh", "SSH session manager" },
   { "SUPER", "T", "$HOME/.config/hypr/scripts/ThemeChanger.sh", "Global theme switcher using Wallust" },
   { "SUPER", "H", "$HOME/.config/hypr/scripts/KeyHints.sh", "help / cheat sheet" },
-  { "SUPER ALT", "R", "$HOME/.config/hypr/scripts/Refresh.sh", "refresh bar and menus" },
+  { "SUPER ALT", "R", "$HOME/.config/hypr/scripts/Refresh.sh", "refresh waybar and menus" },
   { "SUPER ALT", "E", "$HOME/.config/hypr/scripts/RofiEmoji.sh", "emoji menu" },
   { "SUPER", "S", "$HOME/.config/hypr/scripts/RofiSearch.sh", "web search" },
   {
@@ -90,6 +91,7 @@ local app_binds = {
   { "SUPER SHIFT", "G", "$HOME/.config/hypr/scripts/GameMode.sh", "toggle game mode" },
   { "SUPER ALT", "L", "$HOME/.config/hypr/scripts/ChangeLayout.sh toggle", "toggle layouts" },
   { "SUPER ALT", "V", "$HOME/.config/hypr/scripts/ClipManager.sh", "clipboard manager" },
+  { "CTRL ALT", "D", "$HOME/.config/hypr/scripts/Dock.sh", "toggle dock" },
   { "SUPER CTRL", "R", "$HOME/.config/hypr/scripts/RofiThemeSelector.sh", "rofi theme selector" },
   {
     "SUPER CTRL SHIFT",
@@ -99,6 +101,8 @@ local app_binds = {
   },
   { "SUPER CTRL", "K", "$HOME/.config/hypr/scripts/Kitty_themes.sh", "Kitty theme selector" },
   { "SUPER CTRL", "G", "$HOME/.config/hypr/scripts/Ghostty_themes.sh", "Ghostty theme selector" },
+  { "SUPER CTRL", "W", "$HOME/.config/hypr/scripts/RofiWlogoutTheme.sh", "wlogout theme selector" },
+  { "SUPER CTRL SHIFT", "W", "$HOME/.config/hypr/scripts/RofiWlogoutWallust.sh", "wlogout dynamic wallpaper selector" },
   {
     "SUPER SHIFT",
     "B",
@@ -124,13 +128,42 @@ local app_binds = {
   {
     "SUPER ALT",
     "mouse_down",
-    "hyprctl keyword cursor:zoom_factor \"$(hyprctl getoption cursor:zoom_factor | awk 'NR==1 {factor = $2; if (factor < 1) {factor = 1}; print factor * 2.0}')\"",
+    function()
+      local factor = (
+        hl
+        and hl.get_config
+        and (hl.get_config("cursor.zoom_factor") or hl.get_config("cursor:zoom_factor"))
+      ) or 1.0
+      if factor < 1.0 then
+        factor = 1.0
+      end
+      local new_factor = factor * 1.5
+      if new_factor > 16.0 then
+        new_factor = 16.0
+      end
+      if hl and hl.config then
+        hl.config({ cursor = { zoom_factor = new_factor } })
+      end
+    end,
     "zoom in",
   },
   {
     "SUPER ALT",
     "mouse_up",
-    "hyprctl keyword cursor:zoom_factor \"$(hyprctl getoption cursor:zoom_factor | awk 'NR==1 {factor = $2; if (factor < 1) {factor = 1}; print factor / 2.0}')\"",
+    function()
+      local factor = (
+        hl
+        and hl.get_config
+        and (hl.get_config("cursor.zoom_factor") or hl.get_config("cursor:zoom_factor"))
+      ) or 1.0
+      local new_factor = factor / 1.5
+      if new_factor < 1.0 then
+        new_factor = 1.0
+      end
+      if hl and hl.config then
+        hl.config({ cursor = { zoom_factor = new_factor } })
+      end
+    end,
     "zoom out",
   },
   { "SUPER CTRL ALT", "B", "pkill -SIGUSR1 waybar", "toggle waybar on/off" },
@@ -216,16 +249,28 @@ bind("SUPER", "F", dispatch("fullscreen", "1"), { description = "maximize window
 bind("SUPER", "SPACE", dispatch("togglefloating", ""), { description = "Float current window" })
 bind("SUPER CTRL", "O", dispatch("setprop", "active opaque toggle"), { description = "toggle active window opacity" })
 bind(
-  "ALT_L",
-  "SHIFT_L",
-  dispatch("switch keyboard layout globally", "exec, $HOME/.config/hypr/scripts/KeyboardLayout.sh switch"),
-  { locked = true, description = "switch keyboard layout globally" }
+  "ALT",
+  "Shift_L",
+  exec_cmd("$HOME/.config/hypr/scripts/KeyboardLayout.sh switch"),
+  { description = "switch keyboard layout globally", locked = true }
 )
 bind(
-  "SHIFT_L",
-  "ALT_L",
-  dispatch("switch keyboard layout per-window", "exec, $HOME/.config/hypr/scripts/Tak0-Per-Window-Switch.sh"),
-  { locked = true, description = "switch keyboard layout per-window" }
+  "ALT",
+  "Shift_R",
+  exec_cmd("$HOME/.config/hypr/scripts/KeyboardLayout.sh switch"),
+  { description = "switch keyboard layout globally (right shift)", locked = true }
+)
+bind(
+  "SHIFT",
+  "Alt_L",
+  exec_cmd("$HOME/.config/hypr/scripts/Tak0-Per-Window-Switch.sh"),
+  { description = "switch keyboard layout per-window", locked = true }
+)
+bind(
+  "SHIFT",
+  "Alt_R",
+  exec_cmd("$HOME/.config/hypr/scripts/Tak0-Per-Window-Switch.sh"),
+  { description = "switch keyboard layout per-window (right alt)", locked = true }
 )
 bind(
   "SUPER CTRL",
@@ -311,21 +356,24 @@ bind("SUPER SHIFT", "period", dispatch("layoutmsg", "move +col"), { description 
 bind("SUPER SHIFT", "comma", dispatch("layoutmsg", "move -col"), { description = "move to left column" })
 bind("SUPER ALT", "comma", dispatch("layoutmsg", "swapcol l"), { description = "swap columns left" })
 bind("SUPER ALT", "period", dispatch("layoutmsg", "swapcol r"), { description = "swap columns right" })
-bind(
-  "SUPER ALT",
-  "H",
-  exec_cmd("hyprctl keyword scrolling:direction right"),
-  { description = "Horizonal scroll right" }
-)
-bind("SUPER CTRL", "V", exec_cmd("hyprctl keyword scrolling:direction down"), { description = "Vertical Scroll down" })
-bind(
-  "SUPER ALT",
-  "S",
-  exec_cmd(
-    'bash -c \'[[ $(hyprctl getoption scrolling:direction -j | jq -r ".str") == "right" ]] && hyprctl keyword scrolling:direction down || hyprctl keyword scrolling:direction right\''
-  ),
-  { description = "toggle scrolling V/H" }
-)
+bind("SUPER ALT", "H", function()
+  if hl and hl.config then
+    hl.config({ scrolling = { direction = "right" } })
+  end
+end, { description = "Horizonal scroll right" })
+bind("SUPER CTRL", "V", function()
+  if hl and hl.config then
+    hl.config({ scrolling = { direction = "down" } })
+  end
+end, { description = "Vertical Scroll down" })
+bind("SUPER ALT", "S", function()
+  if hl and hl.config then
+    local cur = (hl.get_config and (hl.get_config("scrolling.direction") or hl.get_config("scrolling:direction")))
+      or "right"
+    local next_dir = (cur == "right") and "down" or "right"
+    hl.config({ scrolling = { direction = next_dir } })
+  end
+end, { description = "toggle scrolling V/H" })
 -- Section: Hyprview expose controls
 -- "smartgrid", "justified", "masonry", "bands", "hero", "spiral"
 -- "satellite", "staggered", "columnar", "vortex", "random"
@@ -376,46 +424,12 @@ local function _monitor_width(win)
   end
   return nil
 end
-bind("SUPER", "R", function()
-  local ws = hl.get_active_workspace and hl.get_active_workspace() or nil
-  local ws_layout = ws and (ws.tiled_layout or ws.tiledLayout) or nil
-  if ws_layout ~= "scrolling" then
-    return
-  end
-
-  local w = hl.get_active_window and hl.get_active_window() or nil
-  local col = w ~= nil and w.layout and w.layout.column or nil
-  local current_width = nil
-  if type(col) == "table" then
-    current_width = _as_number(col.width)
-  else
-    current_width = _as_number(col)
-  end
-  if type(current_width) ~= "number" then
-    local ww = _window_width(w)
-    local mw = _monitor_width(w)
-    if type(ww) == "number" and type(mw) == "number" and mw > 0 then
-      current_width = ww / mw
-    end
-  end
-  if type(current_width) ~= "number" or current_width <= 0 then
-    return
-  end
-  if current_width > 1 then
-    current_width = 1
-  end
-
-  local closest, best = 1, math.huge
-  for i, v in ipairs(col_width_presets) do
-    local diff = math.abs(v - current_width)
-    if diff < best then
-      best, closest = diff, i
-    end
-  end
-
-  local nextIdx = closest % #col_width_presets + 1
-  hl.dispatch(hl.dsp.layout("colresize " .. tostring(col_width_presets[nextIdx])))
-end, { description = "cycle column width preset (scrolling)" })
+bind(
+  "SUPER",
+  "R",
+  exec_cmd("bash $HOME/.config/hypr/scripts/ScrollCycleColumnWidth.sh"),
+  { description = "cycle column width preset (scrolling)" }
+)
 bind("ALT", "Tab", exec_cmd("$HOME/.config/hypr/scripts/LuaCycleWindow.sh next"), { description = "cycle next window" })
 
 -- Section: Audio, media, and hardware keys
@@ -464,37 +478,31 @@ bind(
 )
 bind(
   "",
-  "xf86AudioPlayPause",
+  "XF86AudioPlay",
   exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --pause"),
   { description = "play/pause", locked = true }
 )
 bind(
   "",
-  "xf86AudioPause",
+  "XF86AudioPause",
   exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --pause"),
   { description = "pause", locked = true }
 )
 bind(
   "",
-  "xf86AudioPlay",
-  exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --pause"),
-  { description = "play", locked = true }
-)
-bind(
-  "",
-  "xf86AudioNext",
+  "XF86AudioNext",
   exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --nxt"),
   { description = "next track", locked = true }
 )
 bind(
   "",
-  "xf86AudioPrev",
+  "XF86AudioPrev",
   exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --prv"),
   { description = "previous track", locked = true }
 )
 bind(
   "",
-  "xf86audiostop",
+  "XF86AudioStop",
   exec_cmd("$HOME/.config/hypr/scripts/MediaCtrl.sh --stop"),
   { description = "stop", locked = true }
 )
@@ -548,28 +556,14 @@ bind(
 )
 bind(
   "",
-  "xf86TouchpadToggle",
-  exec_cmd("$HOME/.config/hypr/scripts/TouchPad.sh"),
-  { description = "disable touchpad" }
+  "xf86KbdLightOnOff",
+  exec_cmd("$HOME/.config/hypr/scripts/BrightnessKbd.sh --cycle"),
+  { description = "cycle keyboard brightness", locked = true }
 )
-bind(
-  "",
-  "xf86Launch1",
-  exec_cmd("rog-control-center"),
-  { description = "ASUS Armory crate button" }
-)
-bind(
-  "",
-  "xf86Launch3",
-  exec_cmd("asusctl led-mode -n"),
-  { description = "FN+F4 Switch keyboard RGB profile" }
-)
-bind(
-  "",
-  "xf86Launch4",
-  exec_cmd("asusctl profile -n"),
-  { description = "FN+F5 change of fan profiles" }
-)
+bind("", "xf86TouchpadToggle", exec_cmd("$HOME/.config/hypr/scripts/TouchPad.sh"), { description = "disable touchpad" })
+bind("", "xf86Launch1", exec_cmd("rog-control-center"), { description = "ASUS Armory crate button" })
+bind("", "xf86Launch3", exec_cmd("asusctl led-mode -n"), { description = "FN+F4 Switch keyboard RGB profile" })
+bind("", "xf86Launch4", exec_cmd("asusctl profile -n"), { description = "FN+F5 change of fan profiles" })
 
 -- Section: Screenshot bindings
 bind("SUPER", "Print", exec_cmd("$HOME/.config/hypr/scripts/ScreenShot.sh --now"), { description = "screenshot now" })
@@ -702,6 +696,7 @@ bind("SUPER", "G", dispatch("togglegroup", ""), { description = "toggle group" }
 bind("SUPER", "Tab", dispatch("changegroupactive", "f"), { description = "Change Group Forward" })
 bind("SUPER SHIFT", "Tab", dispatch("changegroupactive", "b"), { description = "Change Group Back" })
 bind("SUPER CTRL", "J", dispatch("moveintogroup", "l"), { description = "Move left into group" })
+bind("SUPER CTRL", "L", dispatch("moveintogroup", "r"), { description = "Move Right into group" })
 bind("SUPER CTRL", "H", dispatch("moveoutofgroup", ""), { description = "Move active out of group" })
 bind(
   "SUPER",
@@ -751,7 +746,7 @@ bind(
   "SUPER CTRL",
   "tab",
   exec_cmd("$HOME/.config/hypr/scripts/toggle-qs-hyprview.sh " .. qs_hyprview_layout),
-  { description = "Hyprview Toggle" }
+  { description = "Hyprview overview Toggle" }
 )
 bind("SUPER SHIFT", "U", dispatch("movetoworkspace", "special"), { description = "move to special workspace" })
 bind("SUPER", "U", dispatch("togglespecialworkspace", ""), { description = "toggle special workspace" })
@@ -866,3 +861,14 @@ bind("SUPER", "comma", dispatch("workspace", "e-1"), { description = "previous w
 -- Section: Mouse drag/resize bindings
 bindm("SUPER", "mouse:272", "movewindow", "move window")
 bindm("SUPER", "mouse:273", "resizewindow", "resize window")
+
+-- Section: Keyboard passthrough submap ("Bind KB")
+-- SUPER SHIFT P enters the "Bind KB" submap, which lets the keyboard pass through
+-- to the focused window. The only key bound inside the submap is SUPER ALT P,
+-- which resets back to the normal submap.
+-- While this submap is active, Waybar's hyprland/submap module shows it as
+-- "submap: Bind KB" in the center of the bar, and it stays hidden otherwise.
+bind("SUPER SHIFT", "P", hl.dsp.submap("Bind KB"), { description = "Enter KB passthrough submap" })
+hl.define_submap("Bind KB", function()
+  bind("SUPER ALT", "P", hl.dsp.submap("reset"), { description = "Exit KB passthrough submap" })
+end)

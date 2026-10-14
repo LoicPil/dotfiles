@@ -38,10 +38,11 @@ end
 
 local function raw_dispatch_cmd(command)
   if dsp and dsp.exec_raw then
-    return dsp.exec_raw(tostring(command))
+    return function()
+      hl.dispatch(dsp.exec_raw(tostring(command)))
+    end
   end
-  local expression = "hl.dsp.exec_raw(" .. string.format("%q", tostring(command)) .. ")"
-  return exec_cmd("hyprctl dispatch " .. shell_quote(expression))
+  return exec_cmd("hyprctl dispatch " .. tostring(command))
 end
 
 local function workspace_dispatch(value)
@@ -241,9 +242,20 @@ local function dispatch(name, args)
     end
     return exec_cmd("$HOME/.config/hypr/scripts/LuaSwapWindow.sh " .. swap_direction)
   end
-  if name == "togglegroup" and group_api.toggle then
+  if name == "togglegroup" then
     return function()
-      hl.dispatch(group_api.toggle())
+      if group_api and group_api.toggle then
+        local ok, dispatcher = pcall(group_api.toggle)
+        if ok and dispatcher then
+          hl.dispatch(dispatcher)
+          return
+        end
+      end
+      if dsp and dsp.exec_raw then
+        hl.dispatch(dsp.exec_raw("togglegroup"))
+      else
+        hl.exec_cmd("hyprctl dispatch togglegroup")
+      end
     end
   end
   if name == "changegroupactive" and group_api.next and group_api.prev then
@@ -323,23 +335,23 @@ local function normalize_mods(mods)
   end
   local known = {
     super = "SUPER",
-    super_l = "SUPER_L",
-    super_r = "SUPER_R",
+    super_l = "SUPER",
+    super_r = "SUPER",
     shift = "SHIFT",
-    shift_l = "SHIFT_L",
-    shift_r = "SHIFT_R",
+    shift_l = "SHIFT",
+    shift_r = "SHIFT",
     ctrl = "CTRL",
     control = "CTRL",
-    ctrl_l = "CTRL_L",
-    ctrl_r = "CTRL_R",
-    control_l = "CTRL_L",
-    control_r = "CTRL_R",
+    ctrl_l = "CTRL",
+    ctrl_r = "CTRL",
+    control_l = "CTRL",
+    control_r = "CTRL",
     alt = "ALT",
-    alt_l = "ALT_L",
-    alt_r = "ALT_R",
+    alt_l = "ALT",
+    alt_r = "ALT",
     meta = "META",
-    meta_l = "META_L",
-    meta_r = "META_R",
+    meta_l = "META",
+    meta_r = "META",
     mod2 = "MOD2",
     mod3 = "MOD3",
     mod5 = "MOD5",
